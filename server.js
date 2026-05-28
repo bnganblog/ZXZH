@@ -441,6 +441,66 @@ app.post('/teacher/publish', upload.array('images', 5), (req, res) => {
     res.redirect('/teacher');
 });
 
+// 资源编辑页面
+app.get('/resources/:id/edit', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+
+    const resource = queryOne('SELECT * FROM resources WHERE id = ?', [req.params.id]);
+    if (!resource) {
+        return res.redirect('/resources');
+    }
+
+    // 检查权限：作者本人或管理员
+    if (resource.author_id !== req.session.user.id && req.session.user.role !== 'superadmin' && req.session.user.role !== 'admin') {
+        return res.redirect('/resources/' + req.params.id);
+    }
+
+    let images = [];
+    try {
+        images = resource.images ? JSON.parse(resource.images) : [];
+    } catch (e) {
+        images = [];
+    }
+
+    res.render('resource-edit', { resource, images });
+});
+
+// 资源编辑处理
+app.post('/resources/:id/edit', upload.array('images', 5), (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+
+    const resource = queryOne('SELECT * FROM resources WHERE id = ?', [req.params.id]);
+    if (!resource) {
+        return res.redirect('/resources');
+    }
+
+    if (resource.author_id !== req.session.user.id && req.session.user.role !== 'superadmin' && req.session.user.role !== 'admin') {
+        return res.redirect('/resources/' + req.params.id);
+    }
+
+    const { title, content, unitArea, unitLevel, pointName, isPublic, existingImages } = req.body;
+
+    // 合并已有图片和新上传图片
+    let images = [];
+    if (existingImages) {
+        try { images = JSON.parse(existingImages); } catch (e) { images = []; }
+    }
+    if (req.files && req.files.length > 0) {
+        images = images.concat(req.files.map(f => '/uploads/images/' + f.filename));
+    }
+
+    run(
+        `UPDATE resources SET title=?, content=?, images=?, unit_area=?, unit_level=?, point_name=?, is_public=? WHERE id=?`,
+        [title, content, JSON.stringify(images), unitArea, unitLevel, pointName, parseInt(isPublic) || resource.is_public, req.params.id]
+    );
+
+    res.redirect('/resources/' + req.params.id);
+});
+
 // 教师资源管理
 app.get('/teacher/resources', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'teacher') {
