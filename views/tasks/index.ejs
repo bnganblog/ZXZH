@@ -1,0 +1,173 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-primary mb-2">研学任务卡</h1>
+        <p class="text-gray-600">根据条件筛选合适的研学点位，生成研学任务卡</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">筛选条件</h2>
+        <form action="/tasks" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">学段</label>
+                <select name="gradeLevel"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                    <option value="">全部学段</option>
+                    <option value="1-3年级" <%= filters.gradeLevel === '1-3年级' ? 'selected' : '' %>>小学1-3年级</option>
+                    <option value="4-6年级" <%= filters.gradeLevel === '4-6年级' ? 'selected' : '' %>>小学4-6年级</option>
+                    <option value="初中" <%= filters.gradeLevel === '初中' ? 'selected' : '' %>>初中</option>
+                    <option value="高中" <%= filters.gradeLevel === '高中' ? 'selected' : '' %>>高中</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">大单元层次</label>
+                <select name="unitLevel"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                    <option value="">全部层次</option>
+                    <option value="破坏与修复" <%= filters.unitLevel === '破坏与修复' ? 'selected' : '' %>>破坏与修复</option>
+                    <option value="干预与复苏" <%= filters.unitLevel === '干预与复苏' ? 'selected' : '' %>>干预与复苏</option>
+                    <option value="转型与振兴" <%= filters.unitLevel === '转型与振兴' ? 'selected' : '' %>>转型与振兴</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">所需时长</label>
+                <select name="duration"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                    <option value="">全部时长</option>
+                    <option value="1课时" <%= filters.duration === '1课时' ? 'selected' : '' %>>1课时</option>
+                    <option value="2课时" <%= filters.duration === '2课时' ? 'selected' : '' %>>2课时</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">安全等级</label>
+                <select name="safetyLevel"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                    <option value="">全部等级</option>
+                    <option value="A" <%= filters.safetyLevel === 'A' ? 'selected' : '' %>>A级 - 仅需教师陪同</option>
+                    <option value="B" <%= filters.safetyLevel === 'B' ? 'selected' : '' %>>B级 - 需家长志愿者</option>
+                    <option value="C" <%= filters.safetyLevel === 'C' ? 'selected' : '' %>>C级 - 需专业指导</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-4 flex gap-4">
+                <button type="submit"
+                    class="flex-1 bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition">
+                    筛选点位
+                </button>
+                <a href="/tasks"
+                    class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                    重置
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+        <h3 class="font-bold text-blue-800 mb-2">安全等级说明</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="flex items-start gap-2">
+                <span class="px-2 py-0.5 bg-green-500 text-white rounded text-xs">A级</span>
+                <span class="text-blue-800">仅需教师陪同，适合大多数户外活动</span>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="px-2 py-0.5 bg-yellow-500 text-white rounded text-xs">B级</span>
+                <span class="text-blue-800">需要家长志愿者协助，请提前联系</span>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="px-2 py-0.5 bg-red-500 text-white rounded text-xs">C级</span>
+                <span class="text-blue-800">需要专业人员指导，适合研学基地活动</span>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+            筛选结果 <span class="text-gray-500 text-base font-normal">（共 <%= points.length %> 个点位）</span>
+        </h2>
+
+        <% if (points.length > 0) { %>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <% points.forEach(function(p) { %>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover transition-all duration-300">
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800"><%= p.name %></h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded"><%= p.unit_area %></span>
+                                <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded"><%= p.unit_level %></span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-2 py-1 rounded text-xs font-medium <%= p.safety_level === 'A' ? 'bg-green-100 text-green-700' : p.safety_level === 'B' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700' %>">
+                                <%= p.safety_level %>级
+                            </span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"><%= p.duration %></span>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2"><%= p.description %></p>
+
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-500 mb-2">适用学段：<%= Array.isArray(p.grade_levels) ? p.grade_levels.join('、') : p.grade_levels %></p>
+                    </div>
+
+                    <% if (p.tasks.length > 0) { %>
+                    <div class="mb-4">
+                        <p class="text-sm font-medium text-gray-700 mb-2">任务清单：</p>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <% p.tasks.slice(0, 3).forEach(function(task, i) { %>
+                            <li class="flex items-start gap-2">
+                                <span class="text-primary font-medium"><%= i + 1 %>.</span>
+                                <span><%= task %></span>
+                            </li>
+                            <% }); %>
+                            <% if (p.tasks.length > 3) { %><li class="text-gray-400">...等<%= p.tasks.length %>项任务</li><% } %>
+                        </ul>
+                    </div>
+                    <% } %>
+
+                    <% if (p.resources.length > 0) { %>
+                    <div class="mb-4">
+                        <p class="text-sm font-medium text-gray-700 mb-2">配套资源：</p>
+                        <div class="flex gap-2">
+                            <% p.resources.slice(0, 2).forEach(function(r) { %>
+                            <a href="/resources/<%= r.id %>" class="text-sm text-primary hover:underline truncate max-w-48">
+                                <%= r.title %>
+                            </a>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <% } %>
+
+                    <div class="flex gap-3 pt-4 border-t border-gray-200">
+                        <a href="/tasks/<%= p.id %>" class="flex-1 bg-primary hover:bg-primary-dark text-white text-center py-2 rounded-lg text-sm font-medium transition">
+                            查看任务卡
+                        </a>
+                        <button onclick="window.print()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <div class="bg-white rounded-xl shadow-md p-12 text-center">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <p class="text-gray-500 mb-4">没有找到符合条件的点位</p>
+            <a href="/tasks" class="text-primary hover:underline">清除筛选条件</a>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

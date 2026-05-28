@@ -1,0 +1,262 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-10 animate-fadeInUp">
+        <h1 class="text-4xl font-black gradient-text mb-3">提问信箱</h1>
+        <p class="text-gray-600 text-lg">所有用户均可提问和回答，教师回答将置顶显示</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1 animate-fadeInUp animate-fadeInUp-delay-1 space-y-6">
+            <!-- AI问答对话框 -->
+            <div class="glass-strong rounded-2xl p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800">AI助手</h2>
+                    <span class="px-2 py-0.5 text-xs bg-indigo-100 text-indigo-600 rounded-full">Beta</span>
+                </div>
+
+                <div id="aiChatMessages" class="h-64 overflow-y-auto mb-4 space-y-3 text-sm scroll-smooth">
+                    <div class="flex gap-2">
+                        <div class="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg>
+                        </div>
+                        <div class="bg-indigo-50 text-gray-700 rounded-xl rounded-tl-sm px-3 py-2 max-w-[85%]">
+                            你好！我是AI研学助手，可以回答关于南京幕燕滨江研学的问题。有什么可以帮你的？
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="text" id="aiChatInput" placeholder="输入你的问题..."
+                        class="input-field flex-1 !text-sm !py-2"
+                        onkeypress="if(event.key==='Enter')sendAiChat()">
+                    <button onclick="sendAiChat()" id="aiSendBtn"
+                        class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-2 rounded-xl hover:opacity-90 transition flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    </button>
+                </div>
+                <button onclick="clearAiChat()" class="text-xs text-gray-400 hover:text-gray-600 mt-2 transition">清空对话</button>
+            </div>
+
+            <!-- 我要提问 -->
+            <div class="glass-strong rounded-2xl p-6 sticky top-24">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">我要提问</h2>
+
+                <form action="/questions" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">问题内容 <span class="text-red-500">*</span></label>
+                        <textarea name="content" rows="4" required
+                            class="input-field resize-none"
+                            placeholder="请输入你的问题..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">所属区域</label>
+                        <select name="unitArea" class="input-field">
+                            <option value="">不指定</option>
+                            <option value="幕府山">幕府山</option>
+                            <option value="燕子矶">燕子矶</option>
+                            <option value="八卦洲">八卦洲</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full text-white font-medium py-3 rounded-lg">
+                        提交问题
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-6 border-t border-white/30">
+                    <p class="text-sm text-gray-500">
+                        <% if (isAuthenticated) { %>
+                            登录身份：<%= currentUser.realName %>（<%= currentUser.role === 'teacher' ? '教师' : '学生' %>）
+                        <% } else { %>
+                            游客身份提问，可匿名
+                        <% } %>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 animate-fadeInUp animate-fadeInUp-delay-2">
+            <div class="glass-strong rounded-2xl p-4 mb-6">
+                <div class="flex flex-wrap gap-2">
+                    <a href="/questions" class="px-4 py-2 rounded-lg text-sm font-medium transition <%= !currentArea && !filterAnswered ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                        全部
+                    </a>
+                    <a href="/questions?area=幕府山" class="px-4 py-2 rounded-lg text-sm font-medium transition <%= currentArea === '幕府山' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                        幕府山
+                    </a>
+                    <a href="/questions?area=燕子矶" class="px-4 py-2 rounded-lg text-sm font-medium transition <%= currentArea === '燕子矶' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                        燕子矶
+                    </a>
+                    <a href="/questions?area=八卦洲" class="px-4 py-2 rounded-lg text-sm font-medium transition <%= currentArea === '八卦洲' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                        八卦洲
+                    </a>
+                    <span class="flex-1"></span>
+                    <a href="/questions?filter=unanswered" class="px-4 py-2 rounded-lg text-sm font-medium transition <%= filterAnswered === 'unanswered' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                        待回答
+                    </a>
+                    <a href="/questions?filter=answered" class="px-4 py-2 rounded-lg text-sm font-medium transition <%= filterAnswered === 'answered' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                        已回答
+                    </a>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <% if (questions.length > 0) { %>
+                    <% questions.forEach(function(q) { %>
+                    <div class="glass-strong rounded-2xl p-6 card-hover">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full <%= q.author_role === 'teacher' ? 'bg-gradient-to-br from-purple-400 to-purple-600 text-white' : q.author_role === 'student' ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white' : 'bg-gradient-to-br from-gray-400 to-gray-600 text-white' %> flex items-center justify-center font-medium flex-shrink-0">
+                                <%= q.author_name.charAt(0) %>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="font-medium text-gray-800"><%= q.author_name %></span>
+                                    <span class="px-2 py-0.5 text-xs rounded <%= q.author_role === 'teacher' ? 'bg-purple-100 text-purple-700' : q.author_role === 'student' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600' %>">
+                                        <%= q.author_role === 'teacher' ? '教师' : q.author_role === 'student' ? '学生' : '游客' %>
+                                    </span>
+                                    <% if (q.unit_area) { %>
+                                        <span class="text-xs text-gray-500"><%= q.unit_area %></span>
+                                    <% } %>
+                                    <span class="text-xs text-gray-400"><%= q.created_at %></span>
+                                </div>
+
+                                <p class="text-gray-700 mb-4"><%= q.content %></p>
+
+                                <% if (q.answers && q.answers.length > 0) { %>
+                                    <div class="space-y-3 mb-4">
+                                        <% q.answers.forEach(function(a, index) { %>
+                                        <div class="p-4 rounded-lg <%= a.author_role === 'teacher' ? 'border-l-4 border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50' : 'border-l-4 border-gray-300 glass' %>">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="font-medium text-gray-800"><%= a.author_name %></span>
+                                                <span class="px-2 py-0.5 text-xs rounded font-medium <%= a.author_role === 'teacher' ? 'bg-purple-200 text-purple-700' : 'bg-blue-200 text-blue-700' %>">
+                                                    <%= a.author_role === 'teacher' ? '教师' : '学生' %>
+                                                </span>
+                                                <% if (a.author_role === 'teacher') { %>
+                                                    <span class="px-2 py-0.5 text-xs bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-700 rounded font-medium">置顶</span>
+                                                <% } %>
+                                                <span class="text-xs text-gray-400"><%= a.created_at %></span>
+                                            </div>
+                                            <p class="text-gray-700 text-sm"><%= a.content %></p>
+                                        </div>
+                                        <% }); %>
+                                    </div>
+                                <% } %>
+
+                                <% if (isAuthenticated) { %>
+                                    <form action="/questions/<%= q.id %>/answer" method="POST" class="mt-4">
+                                        <div class="flex items-center gap-3">
+                                            <input type="text" name="answer" required
+                                                class="input-field flex-grow"
+                                                placeholder="写下你的回答...">
+                                            <button type="submit" class="btn-primary text-white px-6 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap">
+                                                提交回答
+                                            </button>
+                                        </div>
+                                    </form>
+                                <% } else { %>
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                        </svg>
+                                        <a href="/login" class="text-primary hover:underline">登录后可回答</a>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="glass-strong rounded-2xl p-12 text-center">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                        </svg>
+                        <p class="text-gray-500">暂无问题</p>
+                        <p class="text-sm text-gray-400 mt-2">成为第一个提问的人吧！</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let aiChatHistory = JSON.parse(localStorage.getItem('aiChatHistory') || '[]');
+
+function renderAiChat() {
+    const container = document.getElementById('aiChatMessages');
+    const defaultMsg = '<div class="flex gap-2"><div class="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"><svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg></div><div class="bg-indigo-50 text-gray-700 rounded-xl rounded-tl-sm px-3 py-2 max-w-[85%]">你好！我是AI研学助手，可以回答关于南京幕燕滨江研学的问题。有什么可以帮你的？</div></div>';
+
+    if (aiChatHistory.length === 0) {
+        container.innerHTML = defaultMsg;
+        return;
+    }
+
+    let html = defaultMsg;
+    aiChatHistory.forEach(msg => {
+        if (msg.role === 'user') {
+            html += '<div class="flex gap-2 justify-end"><div class="bg-primary text-white rounded-xl rounded-tr-sm px-3 py-2 max-w-[85%]">' + escapeHtml(msg.content) + '</div></div>';
+        } else {
+            html += '<div class="flex gap-2"><div class="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"><svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg></div><div class="bg-indigo-50 text-gray-700 rounded-xl rounded-tl-sm px-3 py-2 max-w-[85%] whitespace-pre-wrap">' + escapeHtml(msg.content) + '</div></div>';
+        }
+    });
+    container.innerHTML = html;
+    container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function sendAiChat() {
+    const input = document.getElementById('aiChatInput');
+    const btn = document.getElementById('aiSendBtn');
+    const text = input.value.trim();
+    if (!text) return;
+
+    aiChatHistory.push({ role: 'user', content: text });
+    input.value = '';
+    renderAiChat();
+
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>';
+
+    fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: aiChatHistory.slice(-10) })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const reply = data.success ? data.reply : ('抱歉，' + (data.message || 'AI服务暂时不可用'));
+        aiChatHistory.push({ role: 'assistant', content: reply });
+        localStorage.setItem('aiChatHistory', JSON.stringify(aiChatHistory.slice(-20)));
+        renderAiChat();
+    })
+    .catch(() => {
+        aiChatHistory.push({ role: 'assistant', content: '网络错误，请稍后重试' });
+        renderAiChat();
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>';
+    });
+}
+
+function clearAiChat() {
+    if (!confirm('确定清空对话记录？')) return;
+    aiChatHistory = [];
+    localStorage.removeItem('aiChatHistory');
+    renderAiChat();
+}
+
+renderAiChat();
+</script>
+
+<%- include('../partials/footer') %>

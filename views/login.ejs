@@ -1,0 +1,85 @@
+<%- include('partials/header') %>
+
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="glass-strong rounded-2xl p-8 animate-fadeInUp">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">登录知行智汇</h1>
+                <p class="text-gray-600 mt-2">欢迎回来，开始你的研学之旅</p>
+            </div>
+
+            <% if (typeof error !== 'undefined' && error) { %>
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <%= error %>
+            </div>
+            <% } %>
+
+            <form action="/login" method="POST" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                    <input type="text" name="username" required
+                        class="input-field"
+                        placeholder="请输入用户名">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">密码</label>
+                    <input type="password" name="password" required
+                        class="input-field"
+                        placeholder="请输入密码">
+                </div>
+
+                <% if (typeof showCaptcha !== 'undefined' && showCaptcha) { %>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">验证码</label>
+                    <div class="flex gap-3">
+                        <input type="text" name="captcha" required
+                            class="input-field flex-1"
+                            placeholder="请输入验证码"
+                            autocomplete="off">
+                        <img src="/captcha" alt="验证码"
+                            class="captcha-img h-10 cursor-pointer rounded-lg border border-gray-200"
+                            onclick="this.src='/captcha?'+Math.random()"
+                            title="点击刷新验证码">
+                    </div>
+                    <p class="text-xs text-orange-500 mt-1">登录失败次数过多，请输入验证码</p>
+                </div>
+                <% } %>
+
+                <button type="submit"
+                    class="w-full btn-primary text-white font-medium py-3 rounded-xl text-base">
+                    登录
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    还没有账号？
+                    <a href="/register" class="text-primary hover:text-primary-light font-medium transition">立即注册</a>
+                </p>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <p class="text-sm text-gray-500 text-center mb-3">测试账号</p>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="glass rounded-xl p-3 text-center">
+                        <p class="font-medium text-gray-700">学生账号</p>
+                        <p class="text-gray-500 text-xs mt-1">student1 / test123</p>
+                    </div>
+                    <div class="glass rounded-xl p-3 text-center">
+                        <p class="font-medium text-gray-700">教师账号</p>
+                        <p class="text-gray-500 text-xs mt-1">teacher1 / test123</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,125 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8 animate-fadeInUp">
+        <h1 class="text-3xl font-bold gradient-text mb-2">定制化练习</h1>
+        <p class="text-gray-600">根据条件自由组卷，针对性练习（不计入考核成绩）</p>
+    </div>
+
+    <div class="max-w-2xl mx-auto">
+        <div class="glass-strong rounded-2xl p-8 animate-fadeInUp animate-fadeInUp-delay-1">
+            <form action="/quiz/custom/start" method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">学段</label>
+                    <select name="grade_level" class="input-field">
+                        <option value="小学(1-3年级)">小学(1-3年级)</option>
+                        <option value="小学(4-6年级)">小学(4-6年级)</option>
+                        <option value="初中">初中</option>
+                        <option value="高中" selected>高中</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">知识点模块</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                            <input type="checkbox" name="unit_levels" value="破坏与修复" class="w-4 h-4 text-primary rounded" checked>
+                            <div>
+                                <p class="font-medium text-gray-800 text-sm">破坏与修复</p>
+                                <p class="text-xs text-gray-500">幕府山</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                            <input type="checkbox" name="unit_levels" value="干预与复苏" class="w-4 h-4 text-primary rounded" checked>
+                            <div>
+                                <p class="font-medium text-gray-800 text-sm">干预与复苏</p>
+                                <p class="text-xs text-gray-500">燕子矶</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                            <input type="checkbox" name="unit_levels" value="转型与振兴" class="w-4 h-4 text-primary rounded" checked>
+                            <div>
+                                <p class="font-medium text-gray-800 text-sm">转型与振兴</p>
+                                <p class="text-xs text-gray-500">八卦洲</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">答题时长</label>
+                    <div class="grid grid-cols-4 gap-3">
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="duration" value="5" class="sr-only">
+                            <span class="text-sm font-medium">5分钟</span>
+                        </label>
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="duration" value="10" class="sr-only" checked>
+                            <span class="text-sm font-medium">10分钟</span>
+                        </label>
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="duration" value="15" class="sr-only">
+                            <span class="text-sm font-medium">15分钟</span>
+                        </label>
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="duration" value="20" class="sr-only">
+                            <span class="text-sm font-medium">20分钟</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">题目数量</label>
+                    <div class="grid grid-cols-4 gap-3">
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="question_count" value="5" class="sr-only">
+                            <span class="text-sm font-medium">5题</span>
+                        </label>
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="question_count" value="10" class="sr-only" checked>
+                            <span class="text-sm font-medium">10题</span>
+                        </label>
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="question_count" value="15" class="sr-only">
+                            <span class="text-sm font-medium">15题</span>
+                        </label>
+                        <label class="text-center p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-primary">
+                            <input type="radio" name="question_count" value="20" class="sr-only">
+                            <span class="text-sm font-medium">20题</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <div class="text-sm text-blue-800">
+                            <p class="font-medium mb-1">练习说明</p>
+                            <ul class="space-y-1 text-blue-700">
+                                <li>· 系统根据条件从题库随机抽题</li>
+                                <li>· 总时长 = 各题限时之和</li>
+                                <li>· 每题提交后即时显示解析</li>
+                                <li>· 练习结果不计入考核成绩</li>
+                                <li>· 错题仍会入库，可在错题库查看</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium text-lg hover:opacity-90 transition">
+                    开始练习
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="/quiz" class="text-gray-500 hover:text-primary transition text-sm">
+                ← 返回闯关首页
+            </a>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,399 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8 animate-fadeInUp">
+        <h1 class="text-3xl font-bold gradient-text mb-2">题目管理</h1>
+        <p class="text-gray-600">管理各模块的选择题和判断题</p>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-4 mb-4 animate-fadeInUp animate-fadeInUp-delay-1">
+        <% ['破坏与修复', '干预与复苏', '转型与振兴'].forEach(function(module) { %>
+        <button onclick="loadModuleQuestions('<%= module %>')"
+            class="px-6 py-3 rounded-xl font-medium transition <%= currentModule === module ? 'btn-primary text-white' : 'glass-strong text-gray-700 hover:shadow-lg' %>">
+            <%= module %>
+        </button>
+        <% }); %>
+    </div>
+
+    <div class="glass-strong rounded-xl p-6 mb-8 animate-fadeInUp animate-fadeInUp-delay-2">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="font-medium text-gray-800">模块设置</span>
+            </div>
+            <div class="flex items-center gap-4 flex-wrap">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600">答题时间</span>
+                    <input type="number" id="moduleTimeInput" min="1" max="60" value="3"
+                        class="w-20 input-field text-center">
+                    <span class="text-gray-600">分钟</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600">通关率</span>
+                    <input type="number" id="modulePassRate" min="10" max="100" value="60"
+                        class="w-20 input-field text-center">
+                    <span class="text-gray-600">%</span>
+                </div>
+                <button onclick="updateModuleSettings()"
+                    class="btn-primary px-6 py-2 text-white rounded-xl font-medium">
+                    保存设置
+                </button>
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">答题时间：学生闯关限时；通关率：达到此正确率视为闯关成功</p>
+    </div>
+
+    <div class="flex justify-end mb-6 animate-fadeInUp animate-fadeInUp-delay-2">
+        <button onclick="showAddModal()" class="flex items-center gap-2 btn-primary px-6 py-3 text-white rounded-xl font-medium">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            添加题目
+        </button>
+    </div>
+
+    <div id="questionList" class="space-y-4 animate-fadeInUp animate-fadeInUp-delay-3">
+        <% questions.forEach(function(q) { %>
+        <div class="glass-strong rounded-xl p-6 card-hover transition">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium <%= q.question_type === 'choice' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' %>">
+                        <%= q.question_type === 'choice' ? '选择题' : '判断题' %>
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600"><%= q.grade_level || '高中' %></span>
+                    <span class="text-yellow-500"><%= '★'.repeat(q.difficulty) %><%= '☆'.repeat(3 - q.difficulty) %></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="showEditModal(<%= q.id %>)" class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                        编辑
+                    </button>
+                    <button onclick="deleteQuestion(<%= q.id %>)" class="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition">
+                        删除
+                    </button>
+                </div>
+            </div>
+            <p class="text-gray-800 mb-4"><%= q.question %></p>
+            <% if (q.question_type === 'choice' && q.options) { %>
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <% JSON.parse(q.options).forEach(function(opt) { %>
+                <div class="px-4 py-2 bg-gray-50 rounded-lg text-sm"><%= opt %></div>
+                <% }); %>
+            </div>
+            <% } %>
+            <div class="flex items-center gap-6 text-sm">
+                <span class="text-gray-500">正确答案：<span class="text-green-600 font-medium"><%= q.answer %></span></span>
+                <span class="text-gray-500">解析：<span class="text-gray-700"><%= q.explanation || '无' %></span></span>
+            </div>
+        </div>
+        <% }); %>
+
+        <% if (questions.length === 0) { %>
+        <div class="glass-strong rounded-xl p-12 text-center">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+            <p class="text-gray-500">当前模块暂无题目</p>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<div id="questionModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="glass-strong rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="bg-primary text-white p-6 flex-shrink-0">
+            <h3 id="modalTitle" class="text-xl font-bold">添加题目</h3>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1">
+            <form id="questionForm" onsubmit="saveQuestion(event)">
+                <input type="hidden" id="questionId" value="">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">题目类型</label>
+                    <select id="questionType" class="input-field" onchange="updateOptionFields()">
+                        <option value="choice">选择题</option>
+                        <option value="judge">判断题</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">题目内容</label>
+                    <textarea id="questionContent" rows="3" class="input-field resize-none" placeholder="请输入题目内容"></textarea>
+                </div>
+
+                <div id="choiceOptions" class="space-y-3 mb-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">选项 A</label>
+                            <input type="text" id="optionA" class="input-field" placeholder="请输入选项A内容">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">选项 B</label>
+                            <input type="text" id="optionB" class="input-field" placeholder="请输入选项B内容">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">选项 C</label>
+                            <input type="text" id="optionC" class="input-field" placeholder="请输入选项C内容">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">选项 D</label>
+                            <input type="text" id="optionD" class="input-field" placeholder="请输入选项D内容">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">正确答案</label>
+                    <select id="correctAnswer" class="input-field">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">解析（可选）</label>
+                    <textarea id="explanation" rows="2" class="input-field resize-none" placeholder="请输入答案解析"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">难度</label>
+                    <div class="flex gap-2">
+                        <% [1, 2, 3].forEach(function(level) { %>
+                        <button type="button" onclick="setDifficulty(<%= level %>)" id="difficultyBtn<%= level %>"
+                            class="w-12 h-12 rounded-xl border-2 transition <%= level === 1 ? 'border-primary bg-primary text-white' : 'border-gray-200 hover:border-primary' %>">
+                            <%= '★'.repeat(level) %>
+                        </button>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">答题时间（秒）</label>
+                    <input type="number" id="timeLimit" min="5" max="300" value="15"
+                        class="input-field"
+                        placeholder="请输入答题时间（秒）">
+                    <p class="text-xs text-gray-500 mt-1">建议选择题15-30秒，判断题10-15秒</p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">适用年级</label>
+                    <select id="gradeLevel" class="input-field">
+                        <option value="小学(1-3年级)">小学(1-3年级)</option>
+                        <option value="小学(4-6年级)">小学(4-6年级)</option>
+                        <option value="初中">初中</option>
+                        <option value="高中" selected>高中</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-6 py-3 glass-strong text-gray-700 rounded-xl font-medium hover:shadow-lg transition">
+                        取消
+                    </button>
+                    <button type="submit" class="flex-1 px-6 py-3 btn-primary text-white rounded-xl font-medium">
+                        保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currentModule = '<%= currentModule %>';
+    let difficulty = 1;
+
+    function setDifficulty(level) {
+        difficulty = level;
+        [1, 2, 3].forEach(function(l) {
+            const btn = document.getElementById('difficultyBtn' + l);
+            if (l === level) {
+                btn.className = 'w-12 h-12 rounded-xl border-2 border-primary bg-primary text-white';
+            } else {
+                btn.className = 'w-12 h-12 rounded-xl border-2 border-gray-200 hover:border-primary';
+            }
+        });
+    }
+
+    function updateOptionFields() {
+        const type = document.getElementById('questionType').value;
+        const choiceOptions = document.getElementById('choiceOptions');
+        const correctAnswer = document.getElementById('correctAnswer');
+
+        if (type === 'judge') {
+            choiceOptions.style.display = 'none';
+            correctAnswer.innerHTML = '<option value="正确">正确</option><option value="错误">错误</option>';
+        } else {
+            choiceOptions.style.display = 'block';
+            correctAnswer.innerHTML = '<option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>';
+        }
+    }
+
+    function updateModuleSettings() {
+        const timeMinutes = document.getElementById('moduleTimeInput').value;
+        const passRate = document.getElementById('modulePassRate').value;
+        if (!timeMinutes || parseInt(timeMinutes) < 1 || parseInt(timeMinutes) > 60) {
+            alert('请输入有效的时间（1-60分钟）');
+            return;
+        }
+        if (!passRate || parseInt(passRate) < 10 || parseInt(passRate) > 100) {
+            alert('请输入有效的通关率（10-100%）');
+            return;
+        }
+
+        fetch('/teacher/quiz/update-module-time', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                unit_level: currentModule,
+                total_time: parseInt(timeMinutes) * 60,
+                pass_rate: parseInt(passRate)
+            })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) {
+                alert('模块设置更新成功！');
+            } else {
+                alert('更新失败：' + data.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('更新失败:', error);
+            alert('更新失败，请重试');
+        });
+    }
+
+    function showAddModal() {
+        document.getElementById('modalTitle').textContent = '添加题目';
+        document.getElementById('questionId').value = '';
+        document.getElementById('questionType').value = 'choice';
+        document.getElementById('questionContent').value = '';
+        document.getElementById('optionA').value = '';
+        document.getElementById('optionB').value = '';
+        document.getElementById('optionC').value = '';
+        document.getElementById('optionD').value = '';
+        document.getElementById('correctAnswer').value = 'A';
+        document.getElementById('explanation').value = '';
+        document.getElementById('timeLimit').value = '15';
+        document.getElementById('gradeLevel').value = '高中';
+        setDifficulty(1);
+        updateOptionFields();
+        document.getElementById('questionModal').classList.remove('hidden');
+    }
+
+    function showEditModal(id) {
+        fetch('/teacher/quiz/get/' + id)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                document.getElementById('modalTitle').textContent = '编辑题目';
+                document.getElementById('questionId').value = data.id;
+                document.getElementById('questionType').value = data.question_type;
+                document.getElementById('questionContent').value = data.question;
+
+                if (data.question_type === 'choice' && data.options) {
+                    const options = JSON.parse(data.options);
+                    document.getElementById('optionA').value = options[0] || '';
+                    document.getElementById('optionB').value = options[1] || '';
+                    document.getElementById('optionC').value = options[2] || '';
+                    document.getElementById('optionD').value = options[3] || '';
+                }
+
+                document.getElementById('correctAnswer').value = data.answer;
+                document.getElementById('explanation').value = data.explanation || '';
+                document.getElementById('timeLimit').value = data.time_limit || '15';
+                document.getElementById('gradeLevel').value = data.grade_level || '高中';
+                setDifficulty(data.difficulty || 1);
+                updateOptionFields();
+                document.getElementById('questionModal').classList.remove('hidden');
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('questionModal').classList.add('hidden');
+    }
+
+    function saveQuestion(event) {
+        event.preventDefault();
+
+        const type = document.getElementById('questionType').value;
+        let options = null;
+
+        if (type === 'choice') {
+            const optA = document.getElementById('optionA').value;
+            const optB = document.getElementById('optionB').value;
+            const optC = document.getElementById('optionC').value;
+            const optD = document.getElementById('optionD').value;
+
+            if (!optA || !optB || !optC || !optD) {
+                alert('请填写所有选项内容');
+                return;
+            }
+            options = JSON.stringify([optA, optB, optC, optD]);
+        } else {
+            options = JSON.stringify(['正确', '错误']);
+        }
+
+        const timeLimit = document.getElementById('timeLimit').value;
+        if (!timeLimit || parseInt(timeLimit) < 5) {
+            alert('请输入有效的答题时间（至少5秒）');
+            return;
+        }
+
+        const data = {
+            id: document.getElementById('questionId').value,
+            unit_level: currentModule,
+            question_type: type,
+            question: document.getElementById('questionContent').value,
+            options: options,
+            answer: document.getElementById('correctAnswer').value,
+            explanation: document.getElementById('explanation').value,
+            difficulty: difficulty,
+            time_limit: parseInt(timeLimit),
+            grade_level: document.getElementById('gradeLevel').value
+        };
+
+        fetch('/teacher/quiz/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(function(res) { return res.json(); })
+          .then(function(result) {
+              if (result.success) {
+                  alert(result.message);
+                  closeModal();
+                  loadModuleQuestions(currentModule);
+              } else {
+                  alert(result.message);
+              }
+          });
+    }
+
+    function deleteQuestion(id) {
+        if (confirm('确定要删除这道题目吗？')) {
+            fetch('/teacher/quiz/delete/' + id, { method: 'POST' })
+                .then(function(res) { return res.json(); })
+                .then(function(result) {
+                    if (result.success) {
+                        alert(result.message);
+                        loadModuleQuestions(currentModule);
+                    } else {
+                        alert(result.message);
+                    }
+                });
+        }
+    }
+
+    function loadModuleQuestions(module) {
+        window.location.href = '/teacher/quiz-manage?module=' + encodeURIComponent(module);
+    }
+
+    document.getElementById('questionModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+
+<%- include('../partials/footer') %>

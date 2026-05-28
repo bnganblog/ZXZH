@@ -1,0 +1,104 @@
+<%- include('partials/header') %>
+
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full">
+        <div class="glass-strong rounded-2xl p-8 animate-fadeInUp">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7c0-1.1.9-2 2-2h2L7.5 4.5 6 6l1.5 1.5L10 5H8c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1h3v2H8c-1.1 0-2-.9-2-2z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold gradient-text">注册知行智汇</h1>
+                <p class="text-gray-600 mt-2">加入我们，开启研学之旅</p>
+            </div>
+
+            <% if (typeof error !== 'undefined' && error) { %>
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <%= error %>
+            </div>
+            <% } %>
+
+            <form action="/register" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                    <input type="text" name="username" required
+                        class="input-field"
+                        placeholder="请输入用户名（用于登录）">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">真实姓名</label>
+                    <input type="text" name="realName" required
+                        class="input-field"
+                        placeholder="请输入真实姓名">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">身份类型</label>
+                    <select name="role" required class="input-field">
+                        <option value="student">学生</option>
+                        <option value="teacher">教师/家长</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">年级/学段</label>
+                    <select name="gradeLevel" required class="input-field">
+                        <optgroup label="小学">
+                            <option value="1-3年级">小学1-3年级</option>
+                            <option value="4-6年级">小学4-6年级</option>
+                        </optgroup>
+                        <optgroup label="中学">
+                            <option value="初中">初中</option>
+                            <option value="高中">高中</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">密码</label>
+                    <input type="password" name="password" required
+                        class="input-field"
+                        placeholder="请输入密码（至少6位）">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">确认密码</label>
+                    <input type="password" name="confirmPassword" required
+                        class="input-field"
+                        placeholder="请再次输入密码">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">验证码</label>
+                    <div class="flex gap-3">
+                        <input type="text" name="captcha" required
+                            class="input-field flex-1"
+                            placeholder="请输入验证码"
+                            autocomplete="off">
+                        <img src="/captcha" alt="验证码"
+                            class="captcha-img h-10 cursor-pointer rounded-lg border border-gray-200"
+                            onclick="this.src='/captcha?'+Math.random()"
+                            title="点击刷新验证码">
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full btn-primary text-white font-medium py-3 rounded-xl text-base">
+                    注册
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    已有账号？
+                    <a href="/login" class="text-primary hover:text-primary-light font-medium transition">立即登录</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

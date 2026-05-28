@@ -1,0 +1,153 @@
+<%- include('_header', { activeMenu: 'resources', title: '资源管理' }) %>
+<div class="animate-fadeInUp">
+    <div class="admin-card p-6 mb-6">
+        <form method="GET" action="/admin/resources" class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm text-gray-600 font-medium">可见性</label>
+                <select name="visibility" class="input-field !w-36 !py-2 !text-sm">
+                    <option value="" <%= typeof filterVisibility !== 'undefined' && !filterVisibility ? 'selected' : '' %>>全部</option>
+                    <option value="teacher" <%= typeof filterVisibility !== 'undefined' && filterVisibility === 'teacher' ? 'selected' : '' %>>教师</option>
+                    <option value="public" <%= typeof filterVisibility !== 'undefined' && filterVisibility === 'public' ? 'selected' : '' %>>公开</option>
+                    <option value="private" <%= typeof filterVisibility !== 'undefined' && filterVisibility === 'private' ? 'selected' : '' %>>私有</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>"
+                    class="input-field !py-2 !text-sm" placeholder="搜索资源标题或作者...">
+            </div>
+            <button type="submit" class="btn-primary text-white px-5 py-2 rounded-lg text-sm font-medium">
+                搜索
+            </button>
+            <a href="/admin/resources" class="text-gray-500 hover:text-gray-700 text-sm transition">重置</a>
+        </form>
+    </div>
+
+    <div class="admin-card overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>标题</th>
+                        <th>作者</th>
+                        <th>领域</th>
+                        <th>级别</th>
+                        <th>可见性</th>
+                        <th>发布时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof resources !== 'undefined' && resources && resources.length > 0) { %>
+                        <% resources.forEach(function(res) { %>
+                        <tr>
+                            <td class="text-gray-500 font-mono text-xs"><%= res.id %></td>
+                            <td>
+                                <span class="font-medium text-dark"><%= res.title %></span>
+                            </td>
+                            <td><%= res.author || '-' %></td>
+                            <td><%= res.area || '-' %></td>
+                            <td><%= res.level || '-' %></td>
+                            <td>
+                                <% if (res.visibility === 'teacher') { %>
+                                    <span class="badge badge-purple">教师</span>
+                                <% } else if (res.visibility === 'public') { %>
+                                    <span class="badge badge-blue">公开</span>
+                                <% } else { %>
+                                    <span class="badge badge-gray">私有</span>
+                                <% } %>
+                            </td>
+                            <td class="text-gray-500 text-xs"><%= res.createdAt %></td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <select onchange="changeVisibility(<%= res.id %>, this.value)" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition">
+                                        <option value="teacher" <%= res.visibility === 'teacher' ? 'selected' : '' %>>教师</option>
+                                        <option value="public" <%= res.visibility === 'public' ? 'selected' : '' %>>公开</option>
+                                        <option value="private" <%= res.visibility === 'private' ? 'selected' : '' %>>私有</option>
+                                    </select>
+                                    <button onclick="deleteResource(<%= res.id %>, '<%= res.title.replace(/'/g, "\\\\'") %>')"
+                                        class="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition font-medium">
+                                        删除
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" class="text-center py-12 text-gray-400">
+                                <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                <p>暂无资源数据</p>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">
+            共 <span class="font-medium text-gray-700"><%= typeof total !== 'undefined' ? total : 0 %></span> 条记录
+        </p>
+        <div class="pagination">
+            <% if (typeof currentPage !== 'undefined' && currentPage > 1) { %>
+                <a href="?page=<%= currentPage - 1 %>">上一页</a>
+            <% } else { %>
+                <span class="disabled">上一页</span>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <% if (i === currentPage) { %>
+                    <span class="active"><%= i %></span>
+                <% } else { %>
+                    <a href="?page=<%= i %>"><%= i %></a>
+                <% } %>
+            <% } %>
+            <% if (typeof currentPage !== 'undefined' && currentPage < totalPages) { %>
+                <a href="?page=<%= currentPage + 1 %>">下一页</a>
+            <% } else { %>
+                <span class="disabled">下一页</span>
+            <% } %>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<script>
+function changeVisibility(resourceId, newVisibility) {
+    if (!confirm('确定要更改该资源的可见性吗？')) return;
+    fetch('/admin/api/resources/' + resourceId + '/visibility', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visibility: newVisibility })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || '操作失败');
+        }
+    })
+    .catch(() => alert('请求失败，请重试'));
+}
+
+function deleteResource(resourceId, title) {
+    if (!confirm('确定要删除资源 "' + title + '" 吗？此操作不可撤销！')) return;
+    fetch('/admin/api/resources/' + resourceId, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || '删除失败');
+        }
+    })
+    .catch(() => alert('请求失败，请重试'));
+}
+</script>
+<%- include('_footer') %>

@@ -1,0 +1,70 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8 animate-fadeInUp">
+        <div class="flex items-center gap-4">
+            <a href="/teacher" class="text-gray-500 hover:text-primary transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h1 class="text-2xl font-bold gradient-text">资源管理</h1>
+        </div>
+        <a href="/teacher/publish" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">
+            发布资源
+        </a>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-4 mb-6">
+        <div class="flex gap-3">
+            <a href="/teacher/resources" class="px-4 py-2 rounded-xl text-sm font-medium transition <%= !currentFilter ? 'btn-primary text-white' : 'glass text-gray-600 hover:bg-white/50' %>">
+                全部
+            </a>
+            <a href="/teacher/resources?filter=teacher" class="px-4 py-2 rounded-xl text-sm font-medium transition <%= currentFilter === 'teacher' ? 'btn-primary text-white' : 'glass text-gray-600 hover:bg-white/50' %>">
+                教师发布
+            </a>
+        </div>
+    </div>
+
+    <% if (resources.length > 0) { %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% resources.forEach(function(r) { %>
+        <div class="glass-strong rounded-2xl overflow-hidden card-hover">
+            <div class="h-44 bg-gray-200 relative">
+                <% if (r.images && JSON.parse(r.images).length > 0) { %>
+                    <img src="<%= JSON.parse(r.images)[0] %>" class="w-full h-full object-cover">
+                <% } else { %>
+                    <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-primary/10 to-primary/5">
+                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                    </div>
+                <% } %>
+                <% if (r.is_public === 2) { %>
+                <span class="absolute top-2 left-2 px-2.5 py-1 bg-primary text-white text-xs rounded-full font-medium">教师发布</span>
+                <% } %>
+            </div>
+            <div class="p-5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium"><%= r.unit_area %></span>
+                    <span class="text-xs text-gray-500"><%= r.author_name %></span>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2 truncate"><%= r.title %></h3>
+                <p class="text-sm text-gray-600 line-clamp-2 mb-3"><%= r.content || '暂无描述' %></p>
+                <p class="text-xs text-gray-400"><%= r.created_at %></p>
+            </div>
+        </div>
+        <% }); %>
+    </div>
+    <% } else { %>
+    <div class="glass-strong rounded-2xl p-12 text-center">
+        <svg class="w-20 h-20 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+        </svg>
+        <p class="text-gray-500 mb-4">暂无资源</p>
+        <a href="/teacher/publish" class="inline-block btn-primary text-white px-6 py-2.5 rounded-xl transition">发布第一个资源</a>
+    </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

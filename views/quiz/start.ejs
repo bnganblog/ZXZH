@@ -1,0 +1,547 @@
+<%- include('../partials/header') %>
+
+<style>nav { display: none !important; }</style>
+
+<div class="nav-glass text-white py-3 px-4 sticky top-0 z-50 shadow-lg">
+    <div class="container mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="javascript:void(0)" onclick="confirmExit()" class="hover:opacity-80 exit-link">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h1 class="font-bold"><%= unitLevel %></h1>
+            <span class="px-2 py-0.5 text-xs bg-white/20 rounded-full"><%= gradeLevel %></span>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span id="timer" class="font-mono text-lg font-bold">--:--</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span>第 <span id="currentNum" class="font-bold"><%= questions.length > 0 ? 1 : 0 %></span> / <span id="totalNum"><%= questions.length %></span> 题</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-gray-200 h-2">
+    <div id="progressBar" class="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-300" style="width: 0%"></div>
+</div>
+
+<main class="flex-grow container mx-auto px-4 py-8 max-w-3xl">
+    <% if (questions.length > 0) { %>
+    <div id="questionContainer" class="glass-strong rounded-2xl p-8">
+        <div class="flex items-center gap-3 mb-6">
+            <div id="typeBadge" class="px-3 py-1 rounded-full text-sm font-medium <%= questions[0].question_type === 'choice' ? 'bg-blue-100 text-blue-700' : questions[0].question_type === 'judge' ? 'bg-orange-100 text-orange-700' : questions[0].question_type === 'fill' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700' %>">
+                <%= questions[0].question_type === 'choice' ? '选择题' : questions[0].question_type === 'judge' ? '判断题' : questions[0].question_type === 'fill' ? '填空题' : '简答题' %>
+            </div>
+            <div class="text-sm text-gray-500">
+                难度：<span class="text-yellow-500"><%= '★'.repeat(questions[0].difficulty) %><%= '☆'.repeat(3 - questions[0].difficulty) %></span>
+            </div>
+        </div>
+
+        <h2 id="questionText" class="text-xl font-medium text-gray-800 mb-8 leading-relaxed">
+            <span id="questionNum" class="text-primary font-bold">1</span>. <%= questions[0].question %>
+        </h2>
+
+        <% if (questions[0].question_type === 'choice' || questions[0].question_type === 'judge') { %>
+        <div id="optionsContainer" class="space-y-3 mb-8">
+            <% if (questions[0].options && questions[0].options.length > 0) { %>
+                <% questions[0].options.forEach(function(opt, i) { %>
+                <label class="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:bg-blue-50 transition-all">
+                    <input type="radio" name="answer" value="<%= opt %>" class="w-5 h-5 text-primary" <%= questions[0].question_type === 'judge' ? 'data-judge="true"' : '' %>>
+                    <span class="text-lg <%= questions[0].question_type === 'judge' ? 'font-medium' : '' %>"><%= opt %></span>
+                </label>
+                <% }); %>
+            <% } else { %>
+                <div class="text-center py-8 text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p>暂无选项，请联系教师添加</p>
+                </div>
+            <% } %>
+        </div>
+        <% } else { %>
+        <div id="answerInputContainer" class="mb-8">
+            <textarea id="answerInput" rows="<%= questions[0].question_type === 'essay' ? '6' : '2' %>"
+                class="input-field resize-none"
+                placeholder="<%= questions[0].question_type === 'essay' ? '请简述您的答案要点...' : '请输入答案' %>"></textarea>
+        </div>
+        <% } %>
+
+        <div class="flex items-center justify-between">
+            <div id="submittedIndicator" class="text-sm text-gray-500 hidden">
+                <svg class="w-4 h-4 inline mr-1 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                已提交
+            </div>
+            <button id="submitBtn" onclick="submitAnswer()"
+                class="btn-primary px-8 py-3 text-white rounded-xl font-medium shadow-lg">
+                提交答案
+            </button>
+        </div>
+
+        <div id="resultContainer" class="hidden mt-8 border-t pt-8">
+            <div id="resultContent"></div>
+            <button id="nextBtn" onclick="nextQuestion()"
+                class="mt-6 w-full btn-secondary px-8 py-3 text-white rounded-xl font-medium transition">
+                下一题
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-6 glass-strong rounded-2xl p-6">
+        <h3 class="font-medium text-gray-700 mb-4">答题进度</h3>
+        <div class="flex flex-wrap gap-2" id="progressDots">
+            <% questions.forEach(function(q, i) { %>
+            <button onclick="jumpToQuestion(<%= i %>)"
+                class="w-10 h-10 rounded-full text-sm font-medium transition <%= i === 0 ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200' %>"
+                id="dot_<%= i %>">
+                <%= i + 1 %>
+            </button>
+            <% }); %>
+        </div>
+        <div class="mt-4 flex items-center gap-4 text-sm">
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded bg-green-500"></span>
+                <span class="text-gray-600">正确</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded bg-red-500"></span>
+                <span class="text-gray-600">错误</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded bg-gray-300"></span>
+                <span class="text-gray-600">未答</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 text-center">
+        <button onclick="confirmSubmitAll()"
+            class="btn-secondary px-6 py-3 text-white rounded-xl font-medium">
+            提前交卷
+        </button>
+    </div>
+
+    <% } else { %>
+    <div class="glass-strong rounded-2xl p-12 text-center">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        <p class="text-gray-500">该单元暂无题目</p>
+        <a href="/quiz" class="inline-block mt-4 text-primary hover:underline">返回选择单元</a>
+    </div>
+    <% } %>
+</main>
+
+<script>
+const questions = <%- JSON.stringify(questions) %>;
+const unitLevel = '<%= unitLevel %>';
+let currentIndex = 0;
+let answers = {};
+let totalTime = 180;
+let remainingTime = totalTime;
+let timerInterval;
+let isSubmitted = false;
+
+function confirmExit() {
+    const confirmed = confirm('警告：仅首次答题成绩计入考核，退出将判定为0分！确定要退出吗？');
+    if (confirmed) {
+        window.location.href = '/quiz';
+    }
+}
+
+function initTimer() {
+    timerInterval = setInterval(() => {
+        remainingTime--;
+        updateTimerDisplay();
+
+        if (remainingTime <= 0) {
+            clearInterval(timerInterval);
+            submitAllAnswers();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    document.getElementById('timer').textContent =
+        String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+
+    const timerEl = document.getElementById('timer');
+    if (remainingTime < 60) {
+        timerEl.classList.add('text-red-500');
+    } else {
+        timerEl.classList.remove('text-red-500');
+    }
+}
+
+async function submitAnswer() {
+    if (isSubmitted) return;
+
+    let answer = '';
+
+    if (questions[currentIndex].question_type === 'choice' || questions[currentIndex].question_type === 'judge') {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        if (!selected) {
+            alert('请选择一个答案');
+            return;
+        }
+        answer = selected.value;
+    } else {
+        answer = document.getElementById('answerInput').value.trim();
+        if (!answer) {
+            alert('请输入答案');
+            return;
+        }
+    }
+
+    isSubmitted = true;
+
+    try {
+        const response = await fetch('/quiz/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                questionId: questions[currentIndex].id,
+                answer: answer,
+                unitLevel: unitLevel
+            })
+        });
+
+        const result = await response.json();
+
+        answers[currentIndex] = {
+            questionId: questions[currentIndex].id,
+            userAnswer: answer,
+            isCorrect: result.isCorrect,
+            correctAnswer: result.correctAnswer,
+            explanation: result.explanation,
+            question: questions[currentIndex]
+        };
+
+        showResult(result, answer);
+        updateProgress();
+
+    } catch (error) {
+        alert('提交失败，请重试');
+        isSubmitted = false;
+    }
+}
+
+async function autoSubmit() {
+    if (isSubmitted) return;
+
+    let answer = '';
+    if (questions[currentIndex].question_type === 'choice' || questions[currentIndex].question_type === 'judge') {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        answer = selected ? selected.value : '';
+    } else {
+        answer = document.getElementById('answerInput').value.trim();
+    }
+
+    isSubmitted = true;
+
+    try {
+        const response = await fetch('/quiz/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                questionId: questions[currentIndex].id,
+                answer: answer || '[未作答]',
+                unitLevel: unitLevel,
+                isTimeout: true
+            })
+        });
+
+        const result = await response.json();
+
+        answers[currentIndex] = {
+            questionId: questions[currentIndex].id,
+            userAnswer: answer || '[未作答]',
+            isCorrect: result.isCorrect,
+            correctAnswer: result.correctAnswer,
+            explanation: result.explanation,
+            question: questions[currentIndex],
+            isTimeout: true
+        };
+
+        showResult(result, answer, true);
+        updateProgress();
+
+    } catch (error) {
+        console.error('提交失败');
+    }
+}
+
+function showResult(result, userAnswer, isTimeout = false) {
+    const resultContainer = document.getElementById('resultContainer');
+    const resultContent = document.getElementById('resultContent');
+    const submitBtn = document.getElementById('submitBtn');
+    const submittedIndicator = document.getElementById('submittedIndicator');
+
+    submitBtn.classList.add('hidden');
+    submittedIndicator.classList.remove('hidden');
+    resultContainer.classList.remove('hidden');
+
+    if (result.isCorrect) {
+        resultContent.innerHTML = `
+            <div class="p-6 bg-green-50 border-2 border-green-200 rounded-xl">
+                <div class="flex items-center gap-3 mb-3">
+                    <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <span class="text-xl font-bold text-green-700">回答正确！</span>
+                </div>
+                ${result.explanation ? '<p class="text-green-700">' + result.explanation + '</p>' : ''}
+            </div>
+        `;
+    } else {
+        let timeoutNote = isTimeout ? '<p class="text-red-700 text-sm mb-2">（答题超时，系统判定为错）</p>' : '';
+        resultContent.innerHTML = `
+            <div class="p-6 bg-red-50 border-2 border-red-200 rounded-xl">
+                <div class="flex items-center gap-3 mb-3">
+                    <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <span class="text-xl font-bold text-red-700">回答错误</span>
+                </div>
+                ${timeoutNote}
+                <p class="text-red-700 mb-2">正确答案：${result.correctAnswer}</p>
+                ${result.explanation ? '<p class="text-red-700">' + result.explanation + '</p>' : ''}
+                <p class="text-gray-600 text-sm mt-2">已加入错题库</p>
+            </div>
+        `;
+    }
+
+    if (currentIndex === questions.length - 1) {
+        document.getElementById('nextBtn').textContent = '查看答题结果';
+        document.getElementById('nextBtn').onclick = showFinalResult;
+    }
+}
+
+function updateProgress() {
+    for (let i = 0; i < questions.length; i++) {
+        const dot = document.getElementById('dot_' + i);
+        if (answers[i]) {
+            dot.className = 'w-10 h-10 rounded-full text-sm font-medium transition ' +
+                (answers[i].isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white');
+        }
+    }
+
+    const progress = (Object.keys(answers).length / questions.length) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+}
+
+function nextQuestion() {
+    if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        loadQuestion(currentIndex);
+    } else {
+        showFinalResult();
+    }
+}
+
+function jumpToQuestion(index) {
+    if (index !== currentIndex) {
+        currentIndex = index;
+        loadQuestion(currentIndex);
+    }
+}
+
+function loadQuestion(index) {
+    const q = questions[index];
+    isSubmitted = false;
+
+    document.getElementById('currentNum').textContent = index + 1;
+    document.getElementById('questionNum').textContent = index + 1;
+    document.getElementById('questionText').innerHTML = '<span id="questionNum" class="text-primary font-bold">' + (index + 1) + '</span>. ' + q.question;
+
+    const typeBadge = document.getElementById('typeBadge');
+    const typeMap = {
+        'choice': ['选择题', 'bg-blue-100 text-blue-700'],
+        'judge': ['判断题', 'bg-orange-100 text-orange-700'],
+        'fill': ['填空题', 'bg-green-100 text-green-700'],
+        'essay': ['简答题', 'bg-purple-100 text-purple-700']
+    };
+    typeBadge.textContent = typeMap[q.question_type][0];
+    typeBadge.className = 'px-3 py-1 rounded-full text-sm font-medium ' + typeMap[q.question_type][1];
+
+    for (let i = 0; i < questions.length; i++) {
+        const dot = document.getElementById('dot_' + i);
+        if (i === index) {
+            if (answers[i]) {
+                dot.className = 'w-10 h-10 rounded-full text-sm font-medium transition ring-2 ring-offset-2 ' +
+                    (answers[i].isCorrect ? 'ring-green-500 bg-green-500 text-white' : 'ring-red-500 bg-red-500 text-white');
+            } else {
+                dot.className = 'w-10 h-10 rounded-full text-sm font-medium transition bg-primary text-white';
+            }
+        } else if (answers[i]) {
+            dot.className = 'w-10 h-10 rounded-full text-sm font-medium transition ' +
+                (answers[i].isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white');
+        } else {
+            dot.className = 'w-10 h-10 rounded-full text-sm font-medium transition bg-gray-100 text-gray-500 hover:bg-gray-200';
+        }
+    }
+
+    const optionsContainer = document.getElementById('optionsContainer');
+    const answerInputContainer = document.getElementById('answerInputContainer');
+
+    if (q.question_type === 'choice' || q.question_type === 'judge') {
+        if (optionsContainer) optionsContainer.classList.remove('hidden');
+        if (answerInputContainer) answerInputContainer.classList.add('hidden');
+        
+        if (q.options && Array.isArray(q.options) && q.options.length > 0) {
+            let optionsHtml = '';
+            q.options.forEach(function(opt) {
+                optionsHtml += `
+                    <label class="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:bg-blue-50 transition-all">
+                        <input type="radio" name="answer" value="${opt}" class="w-5 h-5 text-primary">
+                        <span class="text-lg ${q.question_type === 'judge' ? 'font-medium' : ''}">${opt}</span>
+                    </label>
+                `;
+            });
+            optionsContainer.innerHTML = optionsHtml;
+        } else {
+            const defaultOptions = q.question_type === 'choice' 
+                ? ['A. 选项A', 'B. 选项B', 'C. 选项C', 'D. 选项D']
+                : ['正确', '错误'];
+            let optionsHtml = '';
+            defaultOptions.forEach(function(opt) {
+                optionsHtml += `
+                    <label class="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:bg-blue-50 transition-all">
+                        <input type="radio" name="answer" value="${opt}" class="w-5 h-5 text-primary">
+                        <span class="text-lg ${q.question_type === 'judge' ? 'font-medium' : ''}">${opt}</span>
+                    </label>
+                `;
+            });
+            optionsContainer.innerHTML = optionsHtml;
+        }
+    } else {
+        if (optionsContainer) optionsContainer.classList.add('hidden');
+        if (answerInputContainer) answerInputContainer.classList.remove('hidden');
+        
+        const input = document.getElementById('answerInput');
+        if (input) {
+            input.rows = q.question_type === 'essay' ? 6 : 2;
+            input.placeholder = q.question_type === 'essay' ? '请简述您的答案要点...' : '请输入答案';
+        }
+    }
+
+    document.getElementById('submitBtn').classList.remove('hidden');
+    document.getElementById('submittedIndicator').classList.add('hidden');
+    document.getElementById('resultContainer').classList.add('hidden');
+
+    if (q.question_type === 'fill' || q.question_type === 'essay') {
+        const input = document.getElementById('answerInput');
+        if (input) input.value = '';
+    }
+
+    const progress = ((index) / questions.length) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+}
+
+function showFinalResult() {
+    const correctCount = Object.values(answers).filter(a => a.isCorrect).length;
+    const totalCount = questions.length;
+    const accuracy = Math.round((correctCount / totalCount) * 100);
+
+    document.getElementById('questionContainer').innerHTML = `
+        <div class="text-center">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full ${accuracy >= 60 ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center">
+                <span class="text-4xl font-bold ${accuracy >= 60 ? 'text-green-600' : 'text-red-600'}">${accuracy}%</span>
+            </div>
+
+            <h2 class="text-2xl font-bold gradient-text mb-4">答题完成！</h2>
+
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="glass rounded-xl p-4">
+                    <p class="text-2xl font-bold text-blue-600">${totalCount}</p>
+                    <p class="text-sm text-gray-600">总题数</p>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <p class="text-2xl font-bold text-green-600">${correctCount}</p>
+                    <p class="text-sm text-gray-600">答对</p>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <p class="text-2xl font-bold text-red-600">${totalCount - correctCount}</p>
+                    <p class="text-sm text-gray-600">答错</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <a href="/quiz" class="block w-full btn-primary px-6 py-3 text-white rounded-xl font-medium">
+                    返回答题首页
+                </a>
+                <a href="/quiz/wrong" class="block w-full btn-secondary px-6 py-3 text-white rounded-xl font-medium">
+                    查看错题库
+                </a>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('progressDots').parentElement.classList.add('hidden');
+    document.querySelector('button[onclick="confirmSubmitAll()"]').classList.add('hidden');
+}
+
+function confirmSubmitAll() {
+    const unanswered = questions.length - Object.keys(answers).length;
+    let message = '确定要提前交卷吗？';
+    if (unanswered > 0) {
+        message = '还有 ' + unanswered + ' 道题未作答，确定要提前交卷吗？';
+    }
+
+    if (confirm(message)) {
+        submitAllAnswers();
+    }
+}
+
+async function submitAllAnswers() {
+    clearInterval(timerInterval);
+
+    for (let i = 0; i < questions.length; i++) {
+        if (!answers[i]) {
+            answers[i] = {
+                questionId: questions[i].id,
+                userAnswer: '[未作答]',
+                isCorrect: false,
+                correctAnswer: questions[i].answer,
+                explanation: questions[i].explanation,
+                question: questions[i],
+                isTimeout: true
+            };
+
+            try {
+                await fetch('/quiz/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        questionId: questions[i].id,
+                        answer: '[未作答]',
+                        unitLevel: unitLevel,
+                        isTimeout: true
+                    })
+                });
+            } catch (error) {
+                console.error('提交失败');
+            }
+        }
+    }
+
+    showFinalResult();
+}
+
+initTimer();
+initQuestionTimer();
+</script>
+
+<%- include('../partials/footer') %>

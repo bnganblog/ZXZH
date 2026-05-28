@@ -1,0 +1,178 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-10 animate-fadeInUp">
+        <h1 class="text-4xl font-black gradient-text mb-3">研学资源</h1>
+        <p class="text-gray-600 text-lg">浏览和探索南京幕燕滨江研学资源</p>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-2 mb-8 animate-fadeInUp animate-fadeInUp-delay-1">
+        <div class="flex gap-2">
+            <a href="/resources" class="flex-1 py-3 px-4 rounded-lg text-center font-medium transition <%= !currentArea ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                全部区域
+            </a>
+            <a href="/resources?area=幕府山" class="flex-1 py-3 px-4 rounded-lg text-center font-medium transition <%= currentArea === '幕府山' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                幕府山
+            </a>
+            <a href="/resources?area=燕子矶" class="flex-1 py-3 px-4 rounded-lg text-center font-medium transition <%= currentArea === '燕子矶' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                燕子矶
+            </a>
+            <a href="/resources?area=八卦洲" class="flex-1 py-3 px-4 rounded-lg text-center font-medium transition <%= currentArea === '八卦洲' ? 'btn-primary text-white' : 'text-gray-600 hover:bg-white/30' %>">
+                八卦洲
+            </a>
+        </div>
+    </div>
+
+    <div class="flex gap-4 mb-8 animate-fadeInUp animate-fadeInUp-delay-2">
+        <button id="filter-all" class="btn-primary px-6 py-2 rounded-lg font-medium text-white">
+            全部资源
+        </button>
+        <button id="filter-teacher" class="glass-strong px-6 py-2 rounded-lg font-medium text-gray-600 hover:bg-white/30 transition">
+            教师权威资料
+        </button>
+        <button id="filter-student" class="glass-strong px-6 py-2 rounded-lg font-medium text-gray-600 hover:bg-white/30 transition">
+            学生分享
+        </button>
+    </div>
+
+    <div id="teacher-section" class="animate-fadeInUp animate-fadeInUp-delay-2">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold gradient-text flex items-center gap-2">
+                <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/>
+                </svg>
+                教师发布资源 <span class="text-sm font-normal text-gray-500">(权威资料)</span>
+            </h2>
+            <span class="stat-card px-4 py-2 text-sm text-gray-500"><%= teacherResources.length %> 篇</span>
+        </div>
+
+        <% if (teacherResources.length > 0) { %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <% teacherResources.forEach(function(r) { %>
+            <a href="/resources/<%= r.id %>" class="glass-strong rounded-2xl p-5 card-hover block">
+                <div class="flex items-start gap-3">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-primary/10">
+                        <% if (r.images && JSON.parse(r.images).length > 0) { %>
+                            <img src="<%= JSON.parse(r.images)[0] %>" class="w-full h-full object-cover">
+                        <% } else { %>
+                            <div class="w-full h-full flex items-center justify-center text-primary/50">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/>
+                                </svg>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold text-gray-800 truncate"><%= r.title %></h3>
+                            <span class="px-2 py-0.5 text-xs btn-primary text-white rounded-full font-medium">教师</span>
+                        </div>
+                        <p class="text-sm text-primary"><%= r.author_name %></p>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-2"><%= r.content || '暂无描述' %></p>
+                        <p class="text-xs text-gray-400 mt-2"><%= r.unit_area %> · <%= r.unit_level %> · <%= r.created_at %></p>
+                    </div>
+                </div>
+            </a>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <div class="glass-strong rounded-2xl p-12 text-center mb-12">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/>
+            </svg>
+            <p class="text-gray-500">暂无教师发布的资源</p>
+        </div>
+        <% } %>
+    </div>
+
+    <div id="student-section" class="animate-fadeInUp animate-fadeInUp-delay-3">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold gradient-text flex items-center gap-2">
+                <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                学生分享 <span class="text-sm font-normal text-gray-500">(资源共享、实习记录)</span>
+            </h2>
+            <span class="stat-card px-4 py-2 text-sm text-gray-500"><%= resources.length %> 篇</span>
+        </div>
+
+        <% if (resources.length > 0) { %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% resources.forEach(function(r) { %>
+            <a href="/resources/<%= r.id %>" class="glass-strong rounded-2xl overflow-hidden card-hover block">
+                <div class="h-40 bg-primary/5 relative">
+                    <% if (r.images && JSON.parse(r.images).length > 0) { %>
+                        <img src="<%= JSON.parse(r.images)[0] %>" class="w-full h-full object-cover">
+                    <% } else { %>
+                        <div class="w-full h-full flex items-center justify-center text-primary/30">
+                            <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                            </svg>
+                        </div>
+                    <% } %>
+                    <% if (r.is_public === 0) { %>
+                        <div class="absolute top-2 right-2 px-2 py-1 glass-dark text-white text-xs rounded-full">
+                            私密
+                        </div>
+                    <% } %>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium"><%= r.unit_area %></span>
+                        <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">学生</span>
+                        <span class="text-xs text-gray-500"><%= r.author_name %></span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 truncate"><%= r.title %></h3>
+                    <p class="text-sm text-gray-600 line-clamp-2"><%= r.content || '暂无描述' %></p>
+                    <p class="text-xs text-gray-400 mt-2"><%= r.created_at %></p>
+                </div>
+            </a>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <div class="glass-strong rounded-2xl p-12 text-center">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+            <p class="text-gray-500">暂无学生分享的资源</p>
+            <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated && currentUser.role === 'student') { %>
+                <a href="/student/upload" class="inline-block mt-4 btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                    分享你的第一个资源
+                </a>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    document.getElementById('filter-all').addEventListener('click', function() {
+        document.getElementById('teacher-section').style.display = 'block';
+        document.getElementById('student-section').style.display = 'block';
+        updateActiveButton('filter-all');
+    });
+
+    document.getElementById('filter-teacher').addEventListener('click', function() {
+        document.getElementById('teacher-section').style.display = 'block';
+        document.getElementById('student-section').style.display = 'none';
+        updateActiveButton('filter-teacher');
+    });
+
+    document.getElementById('filter-student').addEventListener('click', function() {
+        document.getElementById('teacher-section').style.display = 'none';
+        document.getElementById('student-section').style.display = 'block';
+        updateActiveButton('filter-student');
+    });
+
+    function updateActiveButton(activeId) {
+        document.querySelectorAll('[id^="filter-"]').forEach(function(btn) {
+            btn.classList.remove('btn-primary', 'text-white');
+            btn.classList.add('glass-strong', 'text-gray-600', 'hover:bg-white/30');
+        });
+        var activeBtn = document.getElementById(activeId);
+        activeBtn.classList.remove('glass-strong', 'text-gray-600', 'hover:bg-white/30');
+        activeBtn.classList.add('btn-primary', 'text-white');
+    }
+</script>
+
+<%- include('../partials/footer') %>

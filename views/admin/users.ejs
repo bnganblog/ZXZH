@@ -1,0 +1,156 @@
+<%- include('_header', { activeMenu: 'users', title: '用户管理' }) %>
+<div class="animate-fadeInUp">
+    <div class="admin-card p-6 mb-6">
+        <form method="GET" action="/admin/users" class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm text-gray-600 font-medium">角色筛选</label>
+                <select name="role" class="input-field !w-36 !py-2 !text-sm">
+                    <option value="" <%= typeof filterRole !== 'undefined' && !filterRole ? 'selected' : '' %>>全部</option>
+                    <option value="student" <%= typeof filterRole !== 'undefined' && filterRole === 'student' ? 'selected' : '' %>>学生</option>
+                    <option value="teacher" <%= typeof filterRole !== 'undefined' && filterRole === 'teacher' ? 'selected' : '' %>>教师</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>"
+                    class="input-field !py-2 !text-sm" placeholder="搜索用户名或真实姓名...">
+            </div>
+            <button type="submit" class="btn-primary text-white px-5 py-2 rounded-lg text-sm font-medium">
+                搜索
+            </button>
+            <a href="/admin/users" class="text-gray-500 hover:text-gray-700 text-sm transition">重置</a>
+        </form>
+    </div>
+
+    <div class="admin-card overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>真实姓名</th>
+                        <th>角色</th>
+                        <th>年级</th>
+                        <th>登录IP</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof users !== 'undefined' && users && users.length > 0) { %>
+                        <% users.forEach(function(user) { %>
+                        <tr>
+                            <td class="text-gray-500 font-mono text-xs"><%= user.id %></td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold">
+                                        <%= user.realName ? user.realName.charAt(0) : 'U' %>
+                                    </div>
+                                    <span class="font-medium"><%= user.username %></span>
+                                </div>
+                            </td>
+                            <td><%= user.realName || '-' %></td>
+                            <td>
+                                <% if (user.role === 'student') { %>
+                                    <span class="badge badge-blue">学生</span>
+                                <% } else if (user.role === 'teacher') { %>
+                                    <span class="badge badge-green">教师</span>
+                                <% } else { %>
+                                    <span class="badge badge-purple"><%= user.role %></span>
+                                <% } %>
+                            </td>
+                            <td><%= user.gradeLevel || '-' %></td>
+                            <td class="text-gray-500 text-xs font-mono"><%= user.loginIp %></td>
+                            <td class="text-gray-500 text-xs"><%= user.createdAt %></td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <select onchange="changeRole(<%= user.id %>, this.value)" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition">
+                                        <option value="student" <%= user.role === 'student' ? 'selected' : '' %>>学生</option>
+                                        <option value="teacher" <%= user.role === 'teacher' ? 'selected' : '' %>>教师</option>
+                                    </select>
+                                    <button onclick="deleteUser(<%= user.id %>, '<%= user.username %>')"
+                                        class="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition font-medium">
+                                        删除
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" class="text-center py-12 text-gray-400">
+                                <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                                <p>暂无用户数据</p>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">
+            共 <span class="font-medium text-gray-700"><%= typeof total !== 'undefined' ? total : 0 %></span> 条记录
+        </p>
+        <div class="pagination">
+            <% if (typeof currentPage !== 'undefined' && currentPage > 1) { %>
+                <a href="?page=<%= currentPage - 1 %>">上一页</a>
+            <% } else { %>
+                <span class="disabled">上一页</span>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <% if (i === currentPage) { %>
+                    <span class="active"><%= i %></span>
+                <% } else { %>
+                    <a href="?page=<%= i %>"><%= i %></a>
+                <% } %>
+            <% } %>
+            <% if (typeof currentPage !== 'undefined' && currentPage < totalPages) { %>
+                <a href="?page=<%= currentPage + 1 %>">下一页</a>
+            <% } else { %>
+                <span class="disabled">下一页</span>
+            <% } %>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<script>
+function changeRole(userId, newRole) {
+    if (!confirm('确定要更改该用户的角色吗？')) return;
+    fetch('/admin/api/users/' + userId + '/role', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || '操作失败');
+        }
+    })
+    .catch(() => alert('请求失败，请重试'));
+}
+
+function deleteUser(userId, username) {
+    if (!confirm('确定要删除用户 "' + username + '" 吗？此操作不可撤销！')) return;
+    fetch('/admin/api/users/' + userId, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || '删除失败');
+        }
+    })
+    .catch(() => alert('请求失败，请重试'));
+}
+</script>
+<%- include('_footer') %>

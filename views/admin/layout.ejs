@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title + ' - 后台管理' : '后台管理系统' %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6C5CE7',
+                        'primary-dark': '#5A4BD1',
+                        'primary-light': '#A29BFE',
+                        secondary: '#00CEC9',
+                        'secondary-dark': '#00B5B0',
+                        accent: '#FD79A8',
+                        'accent-warm': '#FDCB6E',
+                        dark: '#2D3436',
+                        neutral: '#F0F3F8',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'Microsoft YaHei', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background: #f0f2f5;
+            font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+            color: #2D3436;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        }
+
+        .glass-dark {
+            background: rgba(45, 52, 54, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(108, 92, 231, 0.12);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.35);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #00CEC9 0%, #81ECEC 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.2);
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.35);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #FD79A8 0%, #FDCB6E 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(253, 121, 168, 0.2);
+        }
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(253, 121, 168, 0.35);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.35);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #6C5CE7, #FD79A8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid rgba(108, 92, 231, 0.15);
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: #6C5CE7;
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+            background: white;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(108, 92, 231, 0.12);
+        }
+
+        .admin-sidebar {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-item:hover {
+            background: rgba(108, 92, 231, 0.15);
+            border-left-color: rgba(108, 92, 231, 0.5);
+        }
+        .sidebar-item.active {
+            background: rgba(108, 92, 231, 0.2);
+            border-left-color: #6C5CE7;
+        }
+        .sidebar-item.active .sidebar-icon {
+            color: #6C5CE7;
+        }
+        .sidebar-item.active .sidebar-label {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .admin-table thead th {
+            background: rgba(108, 92, 231, 0.06);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #6C5CE7;
+            border-bottom: 2px solid rgba(108, 92, 231, 0.1);
+        }
+        .admin-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.875rem;
+        }
+        .admin-table tbody tr {
+            transition: background 0.2s ease;
+        }
+        .admin-table tbody tr:hover {
+            background: rgba(108, 92, 231, 0.03);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-blue {
+            background: rgba(59, 130, 246, 0.12);
+            color: #3b82f6;
+        }
+        .badge-green {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+        }
+        .badge-purple {
+            background: rgba(108, 92, 231, 0.12);
+            color: #6C5CE7;
+        }
+        .badge-gray {
+            background: rgba(107, 114, 128, 0.12);
+            color: #6b7280;
+        }
+        .badge-orange {
+            background: rgba(249, 115, 22, 0.12);
+            color: #f97316;
+        }
+        .badge-red {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pagination a, .pagination span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .pagination a {
+            color: #6C5CE7;
+            background: white;
+            border: 1px solid #e2e8f0;
+        }
+        .pagination a:hover {
+            background: rgba(108, 92, 231, 0.1);
+            border-color: #6C5CE7;
+        }
+        .pagination .active {
+            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        .pagination .disabled {
+            color: #cbd5e1;
+            background: white;
+            border: 1px solid #e2e8f0;
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f0f2f5; }
+        ::-webkit-scrollbar-thumb { background: rgba(108, 92, 231, 0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(108, 92, 231, 0.5); }
+
+        .admin-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex min-h-screen">
+        <aside class="admin-sidebar w-60 flex-shrink-0 flex flex-col sticky top-0 h-screen z-40">
+            <div class="px-5 py-6 border-b border-white/10">
+                <a href="/admin/dashboard" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-white font-bold text-base leading-tight">知行智汇</h1>
+                        <p class="text-white/50 text-xs">后台管理系统</p>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="flex-1 py-4 overflow-y-auto">
+                <div class="px-4 mb-2">
+                    <span class="text-white/30 text-xs font-medium uppercase tracking-wider">主菜单</span>
+                </div>
+                <a href="/admin/dashboard" class="sidebar-item flex items-center gap-3 px-5 py-3 text-white/70 <%= typeof activeMenu !== 'undefined' && activeMenu === 'dashboard' ? 'active' : '' %>">
+                    <svg class="sidebar-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    <span class="sidebar-label text-sm">仪表板</span>
+                </a>
+                <a href="/admin/users" class="sidebar-item flex items-center gap-3 px-5 py-3 text-white/70 <%= typeof activeMenu !== 'undefined' && activeMenu === 'users' ? 'active' : '' %>">
+                    <svg class="sidebar-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 9a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="sidebar-label text-sm">用户管理</span>
+                </a>
+                <a href="/admin/resources" class="sidebar-item flex items-center gap-3 px-5 py-3 text-white/70 <%= typeof activeMenu !== 'undefined' && activeMenu === 'resources' ? 'active' : '' %>">
+                    <svg class="sidebar-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    <span class="sidebar-label text-sm">资源管理</span>
+                </a>
+                <a href="/admin/questions" class="sidebar-item flex items-center gap-3 px-5 py-3 text-white/70 <%= typeof activeMenu !== 'undefined' && activeMenu === 'questions' ? 'active' : '' %>">
+                    <svg class="sidebar-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                    <span class="sidebar-label text-sm">问答管理</span>
+                </a>
+                <a href="/admin/stats" class="sidebar-item flex items-center gap-3 px-5 py-3 text-white/70 <%= typeof activeMenu !== 'undefined' && activeMenu === 'stats' ? 'active' : '' %>">
+                    <svg class="sidebar-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a9 9 0 0118 0v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6a5 5 0 00-10 0v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6a9 9 0 0118 0v6M3 19h4"/></svg>
+                    <span class="sidebar-label text-sm">数据统计</span>
+                </a>
+            </nav>
+
+            <div class="px-5 py-4 border-t border-white/10">
+                <a href="/" class="flex items-center gap-2 text-white/50 hover:text-white/80 transition text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    返回前台
+                </a>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-h-screen">
+            <header class="admin-header h-16 flex items-center justify-between px-6 sticky top-0 z-30">
+                <div class="flex items-center gap-2 text-gray-400 text-sm">
+                    <span>首页</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    <span class="text-gray-700 font-medium">
+                        <%= typeof activeMenu !== 'undefined' ? { dashboard: '仪表板', users: '用户管理', resources: '资源管理', questions: '问答管理', stats: '数据统计' }[activeMenu] || '' : '' %>
+                    </span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-sm font-bold shadow-md">
+                            A
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 leading-tight">
+                                <%= typeof adminUser !== 'undefined' && adminUser ? adminUser.username : 'Admin' %>
+                            </p>
+                            <p class="text-xs text-gray-400">超级管理员</p>
+                        </div>
+                    </div>
+                    <a href="/admin/logout" class="flex items-center gap-1 text-gray-400 hover:text-red-500 transition text-sm ml-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        退出
+                    </a>
+                </div>
+            </header>
+
+            <main class="flex-1 p-6">
+                <%- body %>
+            </main>
+            <%- include('../partials/footer-content') %>
+        </div>
+    </div>
+</body>
+</html>

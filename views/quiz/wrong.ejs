@@ -1,0 +1,258 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8 animate-fadeInUp">
+        <div>
+            <h1 class="text-3xl font-bold gradient-text mb-2">错题库</h1>
+            <p class="text-gray-600">管理和复习您的错题，进行针对性训练</p>
+        </div>
+        <a href="/quiz" class="glass-strong px-5 py-2.5 text-primary rounded-xl hover:bg-primary hover:text-white transition font-medium">
+            返回答题首页
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="stat-card p-5 text-center">
+            <p class="text-3xl font-bold gradient-text"><%= wrongQuestions.length %></p>
+            <p class="text-sm text-gray-500 mt-1">错题总数</p>
+        </div>
+        <div class="stat-card p-5 text-center">
+            <p class="text-3xl font-bold text-red-500"><%= wrongQuestions.filter(q => q.question_type === 'choice').length %></p>
+            <p class="text-sm text-gray-500 mt-1">选择题</p>
+        </div>
+        <div class="stat-card p-5 text-center">
+            <p class="text-3xl font-bold text-orange-500"><%= wrongQuestions.filter(q => q.question_type === 'judge').length %></p>
+            <p class="text-sm text-gray-500 mt-1">判断题</p>
+        </div>
+        <div class="stat-card p-5 text-center">
+            <p class="text-3xl font-bold text-green-500"><%= wrongQuestions.filter(q => q.question_type === 'fill').length %></p>
+            <p class="text-sm text-gray-500 mt-1">填空题</p>
+        </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-4 mb-8">
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2">
+                <label class="text-sm text-gray-600">筛选：</label>
+                <select id="filterUnit" class="input-field text-sm py-2">
+                    <option value="">全部单元</option>
+                    <option value="破坏与修复">破坏与修复</option>
+                    <option value="干预与复苏">干预与复苏</option>
+                    <option value="转型与振兴">转型与振兴</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="filterType" class="input-field text-sm py-2">
+                    <option value="">全部题型</option>
+                    <option value="choice">选择题</option>
+                    <option value="judge">判断题</option>
+                    <option value="fill">填空题</option>
+                    <option value="essay">简答题</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="filterDifficulty" class="input-field text-sm py-2">
+                    <option value="">全部难度</option>
+                    <option value="1">简单</option>
+                    <option value="2">中等</option>
+                    <option value="3">困难</option>
+                </select>
+            </div>
+            <button onclick="applyFilters()" class="btn-primary text-white rounded-lg text-sm px-4 py-2">应用筛选</button>
+            <button onclick="resetFilters()" class="glass-strong rounded-lg text-sm px-4 py-2 text-gray-700 hover:bg-white/60 transition">重置</button>
+        </div>
+    </div>
+
+    <div id="wrongQuestionsList" class="space-y-4">
+        <% if (wrongQuestions.length > 0) { %>
+            <% wrongQuestions.forEach(function(q, index) { %>
+            <div class="wrong-question glass-strong rounded-2xl p-6 card-hover"
+                data-unit="<%= q.unit_level %>"
+                data-type="<%= q.question_type %>"
+                data-difficulty="<%= q.difficulty %>">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-500 flex items-center justify-center font-bold text-sm text-white">
+                            <%= index + 1 %>
+                        </span>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-xs rounded-full font-medium <%= q.question_type === 'choice' ? 'bg-blue-100 text-blue-700' : q.question_type === 'judge' ? 'bg-orange-100 text-orange-700' : q.question_type === 'fill' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700' %>">
+                                    <%= q.question_type === 'choice' ? '选择题' : q.question_type === 'judge' ? '判断题' : q.question_type === 'fill' ? '填空题' : '简答题' %>
+                                </span>
+                                <span class="px-2 py-0.5 text-xs glass text-gray-600 rounded-full">
+                                    <%= q.unit_level %>
+                                </span>
+                                <span class="text-yellow-500 text-sm">
+                                    <%= '★'.repeat(q.difficulty) %><%= '☆'.repeat(3 - q.difficulty) %>
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">加入时间：<%= q.added_at %></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="trainQuestion(<%= q.id %>)" class="btn-primary text-white text-sm px-3 py-1.5 rounded-lg">训练</button>
+                        <button onclick="removeWrong(<%= q.id %>)" class="glass-strong text-gray-600 text-sm px-3 py-1.5 rounded-lg hover:bg-white/60 transition">移除</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="font-medium text-gray-800 mb-4"><%= q.question %></h3>
+                    <div class="glass rounded-xl p-4 text-center">
+                        <svg class="w-5 h-5 inline mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="text-sm text-gray-500">点击"训练"按钮重新作答，查看答案和解析</span>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        <% } else { %>
+            <div class="glass-strong rounded-2xl p-12 text-center">
+                <svg class="w-16 h-16 mx-auto mb-4 text-green-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <p class="text-gray-500 text-lg">太棒了！暂无错题</p>
+                <p class="text-gray-400 text-sm mt-2">继续保持，再接再厉！</p>
+                <a href="/quiz" class="inline-block mt-4 btn-primary text-white px-6 py-2.5 rounded-xl transition">继续答题</a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<div id="trainModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="backdrop-filter:blur(4px);">
+    <div class="glass-strong rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-white/20">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-800">错题训练</h2>
+                <button onclick="closeTrainModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div id="trainContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTrainQuestion = null;
+
+function applyFilters() {
+    const unit = document.getElementById('filterUnit').value;
+    const type = document.getElementById('filterType').value;
+    const difficulty = document.getElementById('filterDifficulty').value;
+    document.querySelectorAll('.wrong-question').forEach(el => {
+        let show = true;
+        if (unit && el.dataset.unit !== unit) show = false;
+        if (type && el.dataset.type !== type) show = false;
+        if (difficulty && el.dataset.difficulty !== difficulty) show = false;
+        el.style.display = show ? 'block' : 'none';
+    });
+}
+
+function resetFilters() {
+    document.getElementById('filterUnit').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterDifficulty').value = '';
+    applyFilters();
+}
+
+async function trainQuestion(id) {
+    try {
+        const response = await fetch('/quiz/train/' + id);
+        const question = await response.json();
+        currentTrainQuestion = question;
+        const modal = document.getElementById('trainModal');
+        const content = document.getElementById('trainContent');
+        let optionsHtml = '';
+        if (question.options) {
+            const options = JSON.parse(question.options);
+            options.forEach(opt => {
+                optionsHtml += `<label class="flex items-center gap-3 p-3 glass rounded-xl cursor-pointer hover:bg-white/60 transition"><input type="radio" name="trainAnswer" value="${opt}" class="w-4 h-4 text-primary"><span>${opt}</span></label>`;
+            });
+        }
+        content.innerHTML = `
+            <div class="mb-4">
+                <span class="px-2 py-1 text-xs rounded-full font-medium ${question.question_type === 'choice' ? 'bg-blue-100 text-blue-700' : question.question_type === 'judge' ? 'bg-orange-100 text-orange-700' : question.question_type === 'fill' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}">
+                    ${question.question_type === 'choice' ? '选择题' : question.question_type === 'judge' ? '判断题' : question.question_type === 'fill' ? '填空题' : '简答题'}
+                </span>
+                <span class="ml-2 text-yellow-500 text-sm">${'★'.repeat(question.difficulty)}${'☆'.repeat(3 - question.difficulty)}</span>
+            </div>
+            <h3 class="text-lg font-medium text-gray-800 mb-6">${question.question}</h3>
+            ${question.question_type === 'choice' || question.question_type === 'judge' ? `<div class="space-y-3 mb-6">${optionsHtml}</div><textarea id="trainAnswerInput" class="hidden"></textarea>` : `<textarea id="trainAnswerInput" rows="4" class="input-field mb-6" placeholder="请输入答案"></textarea>`}
+            <button onclick="submitTrainAnswer()" class="w-full btn-primary text-white rounded-xl font-medium py-3">提交答案</button>
+            <div id="trainResult" class="hidden mt-6"></div>
+        `;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    } catch (error) {
+        alert('加载题目失败');
+    }
+}
+
+async function submitTrainAnswer() {
+    let answer = '';
+    if (currentTrainQuestion.question_type === 'choice' || currentTrainQuestion.question_type === 'judge') {
+        const selected = document.querySelector('input[name="trainAnswer"]:checked');
+        if (!selected) { alert('请选择一个答案'); return; }
+        answer = selected.value;
+    } else {
+        answer = document.getElementById('trainAnswerInput').value.trim();
+        if (!answer) { alert('请输入答案'); return; }
+    }
+    try {
+        const response = await fetch('/quiz/train/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionId: currentTrainQuestion.id, answer: answer })
+        });
+        const result = await response.json();
+        const resultDiv = document.getElementById('trainResult');
+        resultDiv.classList.remove('hidden');
+        if (result.isCorrect) {
+            resultDiv.innerHTML = `<div class="p-4 bg-green-50 border-2 border-green-200 rounded-xl"><div class="flex items-center gap-2 mb-2"><svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><span class="font-bold text-green-700">回答正确！</span></div>${result.explanation ? '<p class="text-green-700 text-sm">' + result.explanation + '</p>' : ''}</div>`;
+            if (currentTrainQuestion.wrongId) {
+                resultDiv.innerHTML += `<p class="text-center text-sm text-gray-500 mt-3">恭喜答对！<a href="#" onclick="removeWrong(${currentTrainQuestion.wrongId}); closeTrainModal();" class="text-primary hover:text-accent font-medium">从错题库移除此题</a></p>`;
+            }
+        } else {
+            resultDiv.innerHTML = `<div class="p-4 bg-red-50 border-2 border-red-200 rounded-xl"><div class="flex items-center gap-2 mb-2"><svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><span class="font-bold text-red-700">回答错误</span></div><p class="text-red-700">正确答案：${result.correctAnswer}</p>${result.explanation ? '<p class="text-red-700 text-sm mt-1">' + result.explanation + '</p>' : ''}</div><button onclick="submitTrainAnswer()" class="w-full mt-4 glass-strong text-primary rounded-xl font-medium py-2.5 hover:bg-primary hover:text-white transition">再试一次</button>`;
+        }
+    } catch (error) {
+        alert('提交失败');
+    }
+}
+
+function closeTrainModal() {
+    const modal = document.getElementById('trainModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    currentTrainQuestion = null;
+}
+
+async function removeWrong(id) {
+    if (!confirm('确定要从错题库移除此题吗？')) return;
+    try {
+        const response = await fetch('/quiz/wrong/' + id, { method: 'DELETE' });
+        if (response.ok) {
+            const el = document.querySelector(`[onclick="removeWrong(${id})"]`).closest('.wrong-question');
+            el.remove();
+            updateStats();
+        } else {
+            alert('移除失败');
+        }
+    } catch (error) {
+        alert('移除失败');
+    }
+}
+
+function updateStats() {
+    const total = document.querySelectorAll('.wrong-question').length;
+    document.querySelector('.grid.grid-cols-2 .text-3xl').textContent = total;
+}
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,186 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="glass rounded-2xl p-8 text-white mb-8 animate-fadeInUp" style="background:linear-gradient(135deg,#3451b2,#5b8af5);">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">教师控制台</h1>
+                <p class="opacity-90">欢迎回来，<%= currentUser.realName %></p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm opacity-80">待回复问题</p>
+                <p class="text-4xl font-black"><%= stats.pendingQuestions %></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6 mb-8 animate-fadeInUp">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-800">个人信息</h2>
+            <button onclick="toggleNameEdit()" class="text-primary hover:text-primary-light text-sm font-medium transition">
+                修改姓名
+            </button>
+            <a href="/change-password" class="text-primary hover:text-primary-light text-sm font-medium transition ml-4">
+                修改密码
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <span class="text-2xl font-bold text-primary"><%= currentUser.realName.charAt(0) %></span>
+            </div>
+            <div>
+                <p class="font-medium text-gray-800"><%= currentUser.realName %></p>
+                <p class="text-sm text-gray-500">教师</p>
+            </div>
+        </div>
+        <form id="nameEditForm" action="/teacher/update-name" method="POST" class="mt-4 hidden">
+            <div class="flex flex-wrap items-center gap-3">
+                <input type="text" name="realName" value="<%= currentUser.realName %>" required maxlength="20"
+                    class="input-field flex-grow min-w-0" placeholder="请输入新姓名">
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
+                        保存
+                    </button>
+                    <button type="button" onclick="toggleNameEdit()" class="px-6 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition whitespace-nowrap">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-5 mb-8">
+        <a href="/teacher/publish" class="glass-strong rounded-2xl p-5 card-hover text-center animate-fadeInUp animate-fadeInUp-delay-1">
+            <div class="w-12 h-12 mx-auto bg-primary/10 rounded-xl flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800">发布资源</h3>
+            <p class="text-xs text-gray-600">发布教师资源</p>
+        </a>
+
+        <a href="/teacher/resources" class="glass-strong rounded-2xl p-5 card-hover text-center animate-fadeInUp animate-fadeInUp-delay-1">
+            <div class="w-12 h-12 mx-auto bg-primary/10 rounded-xl flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800">资源管理</h3>
+            <p class="text-xs text-gray-600">查看所有资源</p>
+        </a>
+
+        <a href="/teacher/quiz-stats" class="glass-strong rounded-2xl p-5 card-hover text-center animate-fadeInUp animate-fadeInUp-delay-2">
+            <div class="w-12 h-12 mx-auto bg-primary/10 rounded-xl flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800">答题统计</h3>
+            <p class="text-xs text-gray-600">查看班级答题</p>
+        </a>
+
+        <a href="/teacher/quiz-manage" class="glass-strong rounded-2xl p-5 card-hover text-center animate-fadeInUp animate-fadeInUp-delay-2">
+            <div class="w-12 h-12 mx-auto bg-primary/10 rounded-xl flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800">题目管理</h3>
+            <p class="text-xs text-gray-600">添加/编辑题目</p>
+        </a>
+
+        <a href="/questions" class="glass-strong rounded-2xl p-5 card-hover text-center animate-fadeInUp animate-fadeInUp-delay-3">
+            <div class="w-12 h-12 mx-auto bg-primary/10 rounded-xl flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-gray-800">提问信箱</h3>
+            <p class="text-xs text-gray-600">回复学生问题</p>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="stat-card p-6">
+            <p class="text-sm text-gray-600 mb-1">总资源数</p>
+            <p class="text-2xl font-bold gradient-text"><%= stats.totalResources %></p>
+        </div>
+        <div class="stat-card p-6">
+            <p class="text-sm text-gray-600 mb-1">教师发布</p>
+            <p class="text-2xl font-bold gradient-text"><%= stats.teacherResources %></p>
+        </div>
+        <div class="stat-card p-6">
+            <p class="text-sm text-gray-600 mb-1">研学点位</p>
+            <p class="text-2xl font-bold gradient-text"><%= stats.totalPoints %></p>
+        </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">最近提问</h2>
+            <a href="/questions" class="text-primary hover:text-primary-light text-sm font-medium transition">查看全部</a>
+        </div>
+
+        <% if (stats.recentQuestions.length > 0) { %>
+        <div class="space-y-3">
+            <% stats.recentQuestions.forEach(function(q) { %>
+            <div class="p-4 glass rounded-xl">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
+                        <%= q.author_name.charAt(0) %>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-medium text-gray-800"><%= q.author_name %></span>
+                            <span class="text-xs px-2 py-0.5 rounded-full <%= q.author_role === 'teacher' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' %> font-medium"><%= q.author_role === 'teacher' ? '教师' : '学生' %></span>
+                            <% if (q.unit_area) { %>
+                            <span class="text-xs text-gray-500"><%= q.unit_area %></span>
+                            <% } %>
+                        </div>
+                        <p class="text-gray-700 text-sm"><%= q.content %></p>
+                        <% if (q.is_answered) { %>
+                        <div class="mt-3 p-3 bg-green-50 rounded-xl border border-green-200">
+                            <p class="text-sm text-green-800"><strong>回复：</strong><%= q.answer %></p>
+                        </div>
+                        <% } else { %>
+                        <div class="mt-2 flex gap-2">
+                            <button onclick="showAnswerForm(<%= q.id %>)" class="text-xs btn-primary text-white px-3 py-1 rounded-lg">回复</button>
+                        </div>
+                        <form id="answer-form-<%= q.id %>" action="/questions/<%= q.id %>/answer" method="POST" class="mt-3 hidden">
+                            <textarea name="answer" rows="2" class="input-field text-sm" placeholder="请输入回复..."></textarea>
+                            <div class="flex gap-2 mt-2">
+                                <button type="submit" class="btn-primary text-white text-xs px-3 py-1.5 rounded-lg">提交</button>
+                                <button type="button" onclick="hideAnswerForm(<%= q.id %>)" class="glass-strong text-gray-700 text-xs px-3 py-1.5 rounded-lg">取消</button>
+                            </div>
+                        </form>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <div class="text-center py-8 text-gray-500">
+            <p>暂无提问</p>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+function showAnswerForm(id) {
+    document.getElementById('answer-form-' + id).classList.remove('hidden');
+}
+
+function hideAnswerForm(id) {
+    document.getElementById('answer-form-' + id).classList.add('hidden');
+}
+
+function toggleNameEdit() {
+    const form = document.getElementById('nameEditForm');
+    form.classList.toggle('hidden');
+}
+</script>
+
+<%- include('../partials/footer') %>

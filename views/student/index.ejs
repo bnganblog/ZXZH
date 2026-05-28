@@ -1,0 +1,186 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="glass rounded-2xl p-8 text-white mb-8 animate-fadeInUp" style="background:linear-gradient(135deg,#3451b2,#5b8af5);">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">学生个人中心</h1>
+                <p class="opacity-90">欢迎回来，<%= currentUser.realName %></p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm opacity-80">我的资源</p>
+                <p class="text-4xl font-black"><%= stats.myResources %></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6 mb-8 animate-fadeInUp">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-800">个人信息</h2>
+            <button onclick="toggleNameEdit()" class="text-primary hover:text-primary-light text-sm font-medium transition">
+                修改姓名
+            </button>
+            <a href="/change-password" class="text-primary hover:text-primary-light text-sm font-medium transition ml-4">
+                修改密码
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <span class="text-2xl font-bold text-primary"><%= currentUser.realName.charAt(0) %></span>
+            </div>
+            <div>
+                <p class="font-medium text-gray-800"><%= currentUser.realName %></p>
+                <p class="text-sm text-gray-500"><%= currentUser.gradeLevel || '未设置年级' %></p>
+            </div>
+        </div>
+        <form id="nameEditForm" action="/student/update-name" method="POST" class="mt-4 hidden">
+            <div class="flex flex-wrap items-center gap-3">
+                <input type="text" name="realName" value="<%= currentUser.realName %>" required maxlength="20"
+                    class="input-field flex-grow min-w-0" placeholder="请输入新姓名">
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
+                        保存
+                    </button>
+                    <button type="button" onclick="toggleNameEdit()" class="px-6 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition whitespace-nowrap">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <a href="/student/upload" class="glass-strong rounded-2xl p-6 card-hover flex items-center gap-4 animate-fadeInUp animate-fadeInUp-delay-1">
+            <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-800">上传资源</h3>
+                <p class="text-sm text-gray-600">分享你的研学成果</p>
+            </div>
+        </a>
+
+        <a href="/student/resources" class="glass-strong rounded-2xl p-6 card-hover flex items-center gap-4 animate-fadeInUp animate-fadeInUp-delay-2">
+            <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-800">我的资源</h3>
+                <p class="text-sm text-gray-600">管理已上传内容</p>
+            </div>
+        </a>
+
+        <a href="/quiz" class="glass-strong rounded-2xl p-6 card-hover flex items-center gap-4 animate-fadeInUp animate-fadeInUp-delay-3">
+            <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-800">参与闯关</h3>
+                <p class="text-sm text-gray-600">挑战大单元问答</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="stat-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">我的资源</p>
+                    <p class="text-2xl font-bold gradient-text"><%= stats.myResources %></p>
+                </div>
+                <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">研学点位</p>
+                    <p class="text-2xl font-bold gradient-text"><%= stats.totalPoints %></p>
+                </div>
+                <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">答对题目</p>
+                    <p class="text-2xl font-bold gradient-text"><%= stats.answeredQuestions %></p>
+                </div>
+                <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-strong rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">最近上传</h2>
+            <a href="/student/resources" class="text-primary hover:text-primary-light text-sm font-medium transition">查看全部</a>
+        </div>
+
+        <% if (myResources.length > 0) { %>
+        <div class="space-y-3">
+            <% myResources.slice(0, 5).forEach(function(r) { %>
+            <div class="flex items-center gap-4 p-4 glass rounded-xl">
+                <div class="w-14 h-14 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <% if (r.images && JSON.parse(r.images).length > 0) { %>
+                        <img src="<%= JSON.parse(r.images)[0] %>" class="w-full h-full object-cover">
+                    <% } else { %>
+                        <div class="w-full h-full flex items-center justify-center text-gray-400">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                            </svg>
+                        </div>
+                    <% } %>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <h3 class="font-medium text-gray-800 truncate"><%= r.title %></h3>
+                    <p class="text-sm text-gray-500"><%= r.unit_area %> · <%= r.created_at %></p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="px-2.5 py-1 text-xs rounded-full font-medium <%= r.is_public === 1 ? 'bg-blue-100 text-blue-700' : r.is_public === 2 ? 'bg-purple-100 text-purple-700' : 'bg-gray-200 text-gray-600' %>">
+                        <%= r.is_public === 1 ? '公开' : r.is_public === 2 ? '教师' : '私密' %>
+                    </span>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <div class="text-center py-12 text-gray-500">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+            <p>暂无上传记录</p>
+            <a href="/student/upload" class="text-primary hover:text-primary-light mt-2 inline-block font-medium transition">立即上传</a>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+function toggleNameEdit() {
+    const form = document.getElementById('nameEditForm');
+    form.classList.toggle('hidden');
+}
+</script>
+
+<%- include('../partials/footer') %>

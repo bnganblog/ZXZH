@@ -1,0 +1,177 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex items-center justify-between mb-6 no-print">
+            <a href="/tasks" class="inline-flex items-center text-gray-500 hover:text-primary">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                返回
+            </a>
+            <button onclick="window.print()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                打印任务卡
+            </button>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none" id="taskCard">
+            <div class="bg-gradient-to-r from-primary to-blue-700 text-white p-8">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm opacity-80 mb-1">南京幕燕滨江研学</p>
+                        <h1 class="text-3xl font-bold mb-2"><%= point.name %></h1>
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm"><%= point.unit_area %></span>
+                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm"><%= point.unit_level %></span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="mb-2">
+                            <span class="px-3 py-1 rounded text-sm font-bold <%= point.safety_level === 'A' ? 'bg-green-500' : point.safety_level === 'B' ? 'bg-yellow-500' : 'bg-red-500' %>">
+                                安全等级 <%= point.safety_level %>
+                            </span>
+                        </div>
+                        <div class="text-sm opacity-80"><%= point.duration %></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 space-y-8">
+                <section>
+                    <h2 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                        </svg>
+                        点位简介
+                    </h2>
+                    <p class="text-gray-700 leading-relaxed"><%= point.description %></p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/>
+                        </svg>
+                        适用学段
+                    </h2>
+                    <div class="flex flex-wrap gap-2">
+                        <% (point.grade_levels || []).forEach(function(g) { %>
+                        <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm"><%= g %></span>
+                        <% }); %>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2z"/>
+                        </svg>
+                        必做任务清单
+                    </h2>
+                    <div class="space-y-3">
+                        <% (point.tasks || []).forEach(function(task, i) { %>
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                <%= i + 1 %>
+                            </div>
+                            <p class="text-gray-700 flex-grow"><%= task %></p>
+                            <div class="w-6 h-6 border-2 border-gray-300 rounded flex-shrink-0"></div>
+                        </div>
+                        <% }); %>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-bold text-red-600 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                        </svg>
+                        安全提示
+                    </h2>
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-800"><%= point.safety_tips %></p>
+                    </div>
+                </section>
+
+                <% if (resources.length > 0) { %>
+                <section>
+                    <h2 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                        配套资源（来自高中生上传）
+                    </h2>
+                    <div class="space-y-2">
+                        <% resources.forEach(function(r) { %>
+                        <a href="/resources/<%= r.id %>" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                            <div class="w-12 h-12 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                                <% if (r.images && JSON.parse(r.images).length > 0) { %>
+                                    <img src="<%= JSON.parse(r.images)[0] %>" class="w-full h-full object-cover">
+                                <% } else { %>
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                        </svg>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <p class="font-medium text-gray-800 truncate"><%= r.title %></p>
+                                <p class="text-sm text-gray-500"><%= r.author_name %></p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                        <% }); %>
+                    </div>
+                </section>
+                <% } %>
+
+                <% if (point.video_links && point.video_links.length > 0) { %>
+                <section>
+                    <h2 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        相关视频
+                    </h2>
+                    <div class="space-y-2">
+                        <% point.video_links.forEach(function(link) { %>
+                        <a href="<%= link %>" target="_blank" class="flex items-center gap-2 text-primary hover:underline">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            <%= link %>
+                        </a>
+                        <% }); %>
+                    </div>
+                </section>
+                <% } %>
+            </div>
+
+            <div class="bg-gray-50 px-8 py-4 border-t border-gray-200 print:hidden">
+                <div class="flex items-center justify-between text-sm text-gray-500">
+                    <span>知行智汇平台 - 南京幕燕滨江研学</span>
+                    <span>生成时间：<%= new Date().toLocaleDateString('zh-CN') %></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    body { background: white; }
+    .no-print { display: none !important; }
+    #taskCard {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+}
+</style>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,6 @@
+node_modules/
+database/zxzh.db
+public/uploads/
+*.log
+.DS_Store
+cookies.txt
