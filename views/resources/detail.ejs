@@ -1,5 +1,25 @@
 <%- include('../partials/header') %>
 
+<style>
+#markdownContent h1 { font-size: 1.75rem; font-weight: 700; margin: 1rem 0 0.75rem; color: #1f2937; }
+#markdownContent h2 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.75rem; color: #1f2937; }
+#markdownContent h3 { font-size: 1.25rem; font-weight: 600; margin: 0.75rem 0 0.5rem; color: #1f2937; }
+#markdownContent p { margin: 0.5rem 0; line-height: 1.75; color: #374151; }
+#markdownContent ul, #markdownContent ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+#markdownContent li { margin: 0.25rem 0; color: #374151; }
+#markdownContent code { background: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.875rem; color: #e11d48; }
+#markdownContent pre { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.75rem; overflow-x: auto; margin: 0.75rem 0; }
+#markdownContent pre code { background: transparent; color: inherit; padding: 0; }
+#markdownContent blockquote { border-left: 4px solid #6C5CE7; padding-left: 1rem; margin: 0.75rem 0; color: #6b7280; font-style: italic; }
+#markdownContent img { max-width: 100%; border-radius: 0.5rem; margin: 0.5rem 0; }
+#markdownContent table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+#markdownContent th, #markdownContent td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
+#markdownContent th { background: #f9fafb; font-weight: 600; }
+#markdownContent a { color: #6C5CE7; text-decoration: underline; }
+#markdownContent a:hover { color: #5A4BD1; }
+#markdownContent hr { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
+</style>
+
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-3xl mx-auto">
         <a href="/resources?area=<%= resource.unit_area %>" class="inline-flex items-center text-gray-500 hover:text-primary mb-6">
@@ -50,7 +70,7 @@
 
                 <div class="mb-8">
                     <h2 class="text-lg font-bold text-gray-800 mb-3">内容描述</h2>
-                    <div class="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    <div id="markdownContent" class="prose prose-gray max-w-none">
                         <%= resource.content || '暂无描述' %>
                     </div>
                 </div>
@@ -248,6 +268,24 @@ function cancelReply() {
     document.getElementById('replyToContentInput').value = '';
     document.getElementById('commentContent').placeholder = '写下你的评论...';
 }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mdElement = document.getElementById('markdownContent');
+    if (mdElement) {
+        const rawContent = mdElement.textContent.trim();
+        if (rawContent && rawContent !== '暂无描述') {
+            try {
+                mdElement.innerHTML = marked.parse(rawContent);
+                mdElement.classList.add('prose', 'prose-gray', 'max-w-none');
+            } catch (e) {
+                mdElement.classList.add('whitespace-pre-wrap');
+            }
+        }
+    }
+});
 </script>
 
 <%- include('../partials/footer') %>

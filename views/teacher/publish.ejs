@@ -1,5 +1,7 @@
 <%- include('../partials/header') %>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto">
         <div class="glass-strong rounded-2xl p-8 animate-fadeInUp">
@@ -14,7 +16,7 @@
 
             <div class="glass rounded-xl p-4 mb-8 border-l-4 border-primary">
                 <p class="text-sm text-gray-700">
-                    <strong class="text-primary">教师资源说明：</strong>教师发布的资源将带有特殊标识，所有用户均可查看，作为研学任务的配套参考材料。
+                    <strong class="text-primary">教师资源说明：</strong>教师发布的资源将带有特殊标识，所有用户均可查看，作为研学任务的配套参考材料。支持Markdown格式编写内容。
                 </p>
             </div>
 
@@ -46,8 +48,8 @@
                     <input type="text" name="pointName" class="input-field" placeholder="请输入相关点位名称（可选）">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">内容描述</label>
-                    <textarea name="content" rows="6" maxlength="5000" class="input-field resize-none" placeholder="请输入详细的资源描述（不超过5000字）"></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">内容描述 <span class="text-gray-400 text-xs">（支持Markdown格式）</span></label>
+                    <textarea id="contentEditor" name="content" rows="10" maxlength="5000" class="input-field resize-none" placeholder="请输入详细的资源描述（支持Markdown格式）"></textarea>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">上传图片</label>
@@ -70,7 +72,24 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 <script>
+const simplemde = new SimpleMDE({
+    element: document.getElementById('contentEditor'),
+    spellChecker: false,
+    status: false,
+    toolbar: [
+        "bold", "italic", "heading", "|",
+        "quote", "unordered-list", "ordered-list", "|",
+        "link", "image", "preview", "|",
+        "guide"
+    ],
+    placeholder: "请输入资源描述，支持Markdown格式...",
+    previewRender: function(plainText) {
+        return simplemde.markdown(plainText);
+    }
+});
+
 function handleFileSelect(input) {
     const fileList = document.getElementById('fileList');
     fileList.innerHTML = '';
