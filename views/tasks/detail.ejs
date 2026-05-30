@@ -1,5 +1,15 @@
 <%- include('../partials/header') %>
 
+<style>
+@media print {
+    nav, header, footer, .no-print, main > .container:first-child { display: none !important; }
+    body { padding: 0 !important; margin: 0 !important; background: white !important; }
+    main { padding: 0 !important; }
+    .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+    #taskCard { box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; }
+}
+</style>
+
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-3xl mx-auto">
         <div class="flex items-center justify-between mb-6 no-print">
