@@ -1,0 +1,86 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">任务卡管理</h1>
+            <p class="text-gray-500 text-sm mt-1">共 <%= points.length %> 个任务卡</p>
+        </div>
+        <a href="/teacher/tasks/create" class="btn-primary text-white px-6 py-2.5 rounded-xl font-medium flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            新建任务卡
+        </a>
+    </div>
+
+    <div class="glass-strong rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200 bg-gray-50/50">
+                        <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">名称</th>
+                        <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">区域</th>
+                        <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">层次</th>
+                        <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">安全等级</th>
+                        <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">时长</th>
+                        <th class="text-left px-6 py-4 text-sm font-medium text-gray-500">学段</th>
+                        <th class="text-right px-6 py-4 text-sm font-medium text-gray-500">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (points.length > 0) { %>
+                    <% points.forEach(function(p) { %>
+                    <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition">
+                        <td class="px-6 py-4">
+                            <p class="font-medium text-gray-800"><%= p.name %></p>
+                            <p class="text-xs text-gray-400 mt-1 line-clamp-1"><%= p.description || '无描述' %></p>
+                        </td>
+                        <td class="px-6 py-4"><span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded"><%= p.unit_area %></span></td>
+                        <td class="px-6 py-4"><span class="px-2 py-0.5 bg-green-50 text-green-600 text-xs rounded"><%= p.unit_level %></span></td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 text-xs rounded font-medium
+                                <%= p.safety_level === 'A' ? 'bg-green-100 text-green-700' : p.safety_level === 'B' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700' %>">
+                                <%= p.safety_level %>级
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600"><%= p.duration %></td>
+                        <td class="px-6 py-4 text-sm text-gray-600"><%= p.grade_levels.join('、') || '-' %></td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="/tasks/<%= p.id %>" class="text-xs text-gray-500 hover:text-primary px-2 py-1 rounded transition" target="_blank">预览</a>
+                                <a href="/teacher/tasks/<%= p.id %>/edit" class="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 rounded transition">编辑</a>
+                                <button onclick="deleteTask(<%= p.id %>, '<%= p.name %>')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded transition">删除</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }); %>
+                    <% } else { %>
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-400">
+                            <p>暂无任务卡，点击"新建任务卡"添加</p>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-6 text-center">
+        <a href="/teacher" class="text-gray-500 hover:text-primary text-sm transition">← 返回教师控制台</a>
+    </div>
+</div>
+
+<script>
+function deleteTask(id, name) {
+    if (!confirm('确定要删除任务卡 "' + name + '" 吗？此操作不可撤销！')) return;
+    fetch('/teacher/tasks/' + id + '/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) location.reload();
+            else alert(data.message || '删除失败');
+        })
+        .catch(() => alert('请求失败'));
+}
+</script>
+
+<%- include('../partials/footer') %>

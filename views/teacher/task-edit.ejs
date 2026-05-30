@@ -1,0 +1,171 @@
+<%- include('../partials/header') %>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="glass-strong rounded-2xl p-8 animate-fadeInUp">
+            <div class="flex items-center gap-4 mb-8">
+                <a href="/teacher/tasks" class="text-gray-500 hover:text-primary transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <h1 class="text-2xl font-bold gradient-text"><%= point ? '编辑任务卡' : '新建任务卡' %></h1>
+            </div>
+
+            <form id="taskForm" class="space-y-5">
+                <input type="hidden" id="taskId" value="<%= point ? point.id : '' %>">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">任务卡名称 <span class="text-red-500">*</span></label>
+                    <input type="text" id="taskName" required maxlength="50" class="input-field" value="<%= point ? point.name : '' %>" placeholder="如：幕府山宕口生态观察">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">大单元区域 <span class="text-red-500">*</span></label>
+                        <select id="unitArea" required class="input-field">
+                            <option value="">请选择</option>
+                            <option value="幕府山" <%= point && point.unit_area === '幕府山' ? 'selected' : '' %>>幕府山</option>
+                            <option value="燕子矶" <%= point && point.unit_area === '燕子矶' ? 'selected' : '' %>>燕子矶</option>
+                            <option value="八卦洲" <%= point && point.unit_area === '八卦洲' ? 'selected' : '' %>>八卦洲</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">大单元层次 <span class="text-red-500">*</span></label>
+                        <select id="unitLevel" required class="input-field">
+                            <option value="">请选择</option>
+                            <option value="破坏与修复" <%= point && point.unit_level === '破坏与修复' ? 'selected' : '' %>>破坏与修复</option>
+                            <option value="干预与复苏" <%= point && point.unit_level === '干预与复苏' ? 'selected' : '' %>>干预与复苏</option>
+                            <option value="转型与振兴" <%= point && point.unit_level === '转型与振兴' ? 'selected' : '' %>>转型与振兴</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">点位简介</label>
+                    <textarea id="contentEditor" rows="6" class="input-field resize-none" placeholder="输入点位描述（支持Markdown）"><%= point ? point.description : '' %></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">安全等级</label>
+                        <select id="safetyLevel" class="input-field">
+                            <option value="A" <%= point && point.safety_level === 'A' ? 'selected' : '' %>>A级 - 仅需教师陪同</option>
+                            <option value="B" <%= point && point.safety_level === 'B' ? 'selected' : '' %>>B级 - 需家长志愿者</option>
+                            <option value="C" <%= point && point.safety_level === 'C' ? 'selected' : '' %>>C级 - 需专业指导</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">所需时长</label>
+                        <select id="duration" class="input-field">
+                            <option value="1课时" <%= point && point.duration === '1课时' ? 'selected' : '' %>>1课时</option>
+                            <option value="2课时" <%= point && point.duration === '2课时' ? 'selected' : '' %>>2课时</option>
+                            <option value="半天" <%= point && point.duration === '半天' ? 'selected' : '' %>>半天</option>
+                            <option value="全天" <%= point && point.duration === '全天' ? 'selected' : '' %>>全天</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">适用学段（可多选）</label>
+                    <div class="flex flex-wrap gap-3">
+                        <% var gradeLevels = point ? (Array.isArray(point.grade_levels) ? point.grade_levels : []) : []; %>
+                        <label class="flex items-center gap-2 px-4 py-2 glass rounded-lg cursor-pointer hover:bg-white/60 transition has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+                            <input type="checkbox" name="grade_levels" value="1-3年级" class="w-4 h-4 text-primary rounded" <%= gradeLevels.includes('1-3年级') ? 'checked' : '' %>>
+                            <span class="text-sm">小学1-3年级</span>
+                        </label>
+                        <label class="flex items-center gap-2 px-4 py-2 glass rounded-lg cursor-pointer hover:bg-white/60 transition has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+                            <input type="checkbox" name="grade_levels" value="4-6年级" class="w-4 h-4 text-primary rounded" <%= gradeLevels.includes('4-6年级') ? 'checked' : '' %>>
+                            <span class="text-sm">小学4-6年级</span>
+                        </label>
+                        <label class="flex items-center gap-2 px-4 py-2 glass rounded-lg cursor-pointer hover:bg-white/60 transition has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+                            <input type="checkbox" name="grade_levels" value="初中" class="w-4 h-4 text-primary rounded" <%= gradeLevels.includes('初中') ? 'checked' : '' %>>
+                            <span class="text-sm">初中</span>
+                        </label>
+                        <label class="flex items-center gap-2 px-4 py-2 glass rounded-lg cursor-pointer hover:bg-white/60 transition has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
+                            <input type="checkbox" name="grade_levels" value="高中" class="w-4 h-4 text-primary rounded" <%= gradeLevels.includes('高中') ? 'checked' : '' %>>
+                            <span class="text-sm">高中</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">任务清单 <span class="text-gray-400 text-xs">（每行一个任务）</span></label>
+                    <textarea id="tasks" rows="5" class="input-field resize-none" placeholder="每行输入一个任务，如：&#10;观察宕口地貌特征&#10;记录植被恢复种类&#10;拍摄修复对比照片"><%= point ? (Array.isArray(point.tasks) ? point.tasks.join('\n') : '') : '' %></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">安全提示</label>
+                    <textarea id="safetyTips" rows="2" class="input-field resize-none" placeholder="如：请勿靠近崖壁，全程跟随老师引导"><%= point ? (point.safety_tips || '') : '' %></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">视频链接 <span class="text-gray-400 text-xs">（每行一个链接）</span></label>
+                    <textarea id="videoLinks" rows="3" class="input-field resize-none" placeholder="每行输入一个视频链接"><%= point ? (Array.isArray(point.video_links) ? point.video_links.join('\n') : '') : '' %></textarea>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <a href="/teacher/tasks" class="flex-1 glass-strong px-6 py-3 rounded-xl text-gray-700 text-center hover:bg-white/60 transition font-medium">取消</a>
+                    <button type="submit" class="flex-1 btn-primary text-white font-medium py-3 rounded-xl">
+                        <%= point ? '保存修改' : '创建任务卡' %>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script>
+const simplemde = new SimpleMDE({
+    element: document.getElementById('contentEditor'),
+    spellChecker: false,
+    status: false,
+    toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "preview", "|", "guide"],
+    placeholder: "输入点位描述，支持Markdown格式...",
+    previewRender: function(plainText) { return simplemde.markdown(plainText); }
+});
+
+document.getElementById('taskForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('taskId').value;
+    const gradeLevels = Array.from(document.querySelectorAll('input[name="grade_levels"]:checked')).map(cb => cb.value);
+    const tasks = document.getElementById('tasks').value;
+    const videoLinks = document.getElementById('videoLinks').value;
+
+    const data = {
+        id: id || undefined,
+        name: document.getElementById('taskName').value,
+        unit_area: document.getElementById('unitArea').value,
+        unit_level: document.getElementById('unitLevel').value,
+        description: simplemde.value(),
+        safety_level: document.getElementById('safetyLevel').value,
+        duration: document.getElementById('duration').value,
+        grade_levels: gradeLevels,
+        tasks: tasks,
+        safety_tips: document.getElementById('safetyTips').value,
+        video_links: videoLinks
+    };
+
+    fetch('/teacher/tasks/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.success) {
+            alert(result.message);
+            window.location.href = '/teacher/tasks';
+        } else {
+            alert(result.message || '保存失败');
+        }
+    })
+    .catch(() => alert('请求失败'));
+});
+</script>
+
+<%- include('../partials/footer') %>

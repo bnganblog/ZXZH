@@ -857,6 +857,96 @@ app.get('/tasks/:id', (req, res) => {
     res.render('tasks/detail', { point, resources });
 });
 
+// ============ 教师任务卡管理路由 ============
+
+// 任务卡列表
+app.get('/teacher/tasks', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'teacher') {
+        return res.redirect('/login');
+    }
+
+    const points = queryAll('SELECT * FROM study_points ORDER BY id DESC');
+    points.forEach(p => {
+        p.grade_levels = JSON.parse(p.grade_levels || '[]');
+        p.tasks = JSON.parse(p.tasks || '[]');
+    });
+
+    res.render('teacher/tasks', { points });
+});
+
+// 新建任务卡页面
+app.get('/teacher/tasks/create', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'teacher') {
+        return res.redirect('/login');
+    }
+    res.render('teacher/task-edit', { point: null });
+});
+
+// 编辑任务卡页面
+app.get('/teacher/tasks/:id/edit', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'teacher') {
+        return res.redirect('/login');
+    }
+
+    const point = queryOne('SELECT * FROM study_points WHERE id = ?', [req.params.id]);
+    if (!point) {
+        return res.redirect('/teacher/tasks');
+    }
+
+    res.render('teacher/task-edit', { point });
+});
+
+// 保存任务卡（新建或编辑）
+app.post('/teacher/tasks/save', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'teacher') {
+        return res.json({ success: false, message: '未授权' });
+    }
+
+    const { id, name, unit_area, unit_level, description, safety_level, duration, grade_levels, tasks, safety_tips, video_links } = req.body;
+
+    if (!name || !unit_area || !unit_level) {
+        return res.json({ success: false, message: '请填写必要字段' });
+    }
+
+    try {
+        const gradeLevelsArr = grade_levels ? (Array.isArray(grade_levels) ? grade_levels : [grade_levels]) : [];
+        const tasksArr = tasks ? (typeof tasks === 'string' ? tasks.split('\n').filter(t => t.trim()) : tasks) : [];
+        const videoLinksArr = video_links ? (typeof video_links === 'string' ? video_links.split('\n').filter(v => v.trim()) : video_links) : [];
+
+        if (id) {
+            run(
+                `UPDATE study_points SET name=?, unit_area=?, unit_level=?, description=?, safety_level=?, duration=?, grade_levels=?, tasks=?, safety_tips=?, video_links=? WHERE id=?`,
+                [name, unit_area, unit_level, description || '', safety_level || 'A', duration || '1课时',
+                 JSON.stringify(gradeLevelsArr), JSON.stringify(tasksArr), safety_tips || '', JSON.stringify(videoLinksArr), id]
+            );
+            res.json({ success: true, message: '任务卡更新成功' });
+        } else {
+            run(
+                `INSERT INTO study_points (name, unit_area, unit_level, description, safety_level, duration, grade_levels, tasks, safety_tips, video_links) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [name, unit_area, unit_level, description || '', safety_level || 'A', duration || '1课时',
+                 JSON.stringify(gradeLevelsArr), JSON.stringify(tasksArr), safety_tips || '', JSON.stringify(videoLinksArr)]
+            );
+            res.json({ success: true, message: '任务卡创建成功' });
+        }
+    } catch (error) {
+        res.json({ success: false, message: '保存失败：' + error.message });
+    }
+});
+
+// 删除任务卡
+app.post('/teacher/tasks/:id/delete', (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'teacher') {
+        return res.json({ success: false, message: '未授权' });
+    }
+
+    try {
+        run('DELETE FROM study_points WHERE id = ?', [req.params.id]);
+        res.json({ success: true, message: '删除成功' });
+    } catch (error) {
+        res.json({ success: false, message: '删除失败' });
+    }
+});
+
 // ============ 闯关答题路由 ============
 
 // 闯关答题首页 - 板块选择
